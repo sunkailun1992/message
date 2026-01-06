@@ -1,0 +1,81 @@
+/*
+ * 调用脚本
+ */
+plugins {
+    id 'java'
+    id 'groovy'
+    id 'org.springframework.boot' version '2.3.2.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id "io.freefair.lombok" version "6.3.0"
+}
+/**
+ * 项目基础信息
+ */
+group = 'com.gbw'
+version = '1.0.0'
+description = 'message'
+/**
+ * 编码规则
+ */
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+/**
+ * 镜像仓库地址
+ */
+repositories {
+    mavenLocal()
+    maven { url "https://maven.aliyun.com/nexus/content/groups/public/" }
+    maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
+    maven { url 'https://maven.aliyun.com/repository/google' }
+    maven { url 'https://maven.aliyun.com/repository/public' }
+}
+/**
+ * 私人仓库配置
+ */
+allprojects {
+    repositories {
+        maven {
+            url 'https://maven.aliyun.com/repository/public'
+        }
+        maven {
+            credentials {
+                username '5f9b8370a3bcee4a48459704'
+                password 'lc3TMO-ktjTN'
+            }
+            url 'https://packages.aliyun.com/maven/repository/2073071-release-ORqNnV/'
+        }
+        maven {
+            credentials {
+                username '5f9b8370a3bcee4a48459704'
+                password 'lc3TMO-ktjTN'
+            }
+            url 'https://packages.aliyun.com/maven/repository/2073071-snapshot-gL7Tr2/'
+        }
+    }
+}
+/**
+ * 打包为 bootJar，可独立运行
+ */
+bootJar {
+    enabled = true
+}
+/**
+ * 测试
+ */
+test {
+    useJUnitPlatform()
+}
+/**
+ * 引入的jar
+ */
+dependencies {
+    implementation 'com:utils:1.0.0'
+    implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery:2.2.6.RELEASE'
+    implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config:2.2.6.RELEASE'
+    testImplementation 'org.codehaus.groovy:groovy:3.0.9'
+    testImplementation 'org.codehaus.groovy:groovy-all:3.0.9'
+    testImplementation 'org.spockframework:spock-core:2.0-groovy-3.0'
+    testImplementation 'org.spockframework:spock-spring:2.0-groovy-3.0'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.3.2.RELEASE'
+}
