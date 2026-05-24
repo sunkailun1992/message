@@ -35,7 +35,7 @@ spring:
             group: DEFAULT_GROUP
             refresh: true
           # 任务调度中心
-          - data-id: schedulerx.yaml
+          - data-id: xxl-job.yaml
             group: DEFAULT_GROUP
             refresh: true
           # 链路监控
