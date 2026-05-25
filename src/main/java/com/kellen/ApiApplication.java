@@ -1,4 +1,4 @@
-package com.gb;
+package com.kellen;
 
 import com.alibaba.cloud.seata.feign.SeataFeignClientAutoConfiguration;
 import org.mybatis.spring.annotation.MapperScan;
@@ -31,7 +31,7 @@ import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 @EnableAsync
 @EnableScheduling
 @EnableTransactionManagement
-@MapperScan("com.gb.*.mapper")
+@MapperScan("com.kellen.*.mapper")
 public class ApiApplication {
 
 	public static void main(String[] args) {

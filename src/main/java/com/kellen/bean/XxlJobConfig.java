@@ -1,6 +1,7 @@
-package com.gb.bean;
+package com.kellen.bean;
 
 import com.xxl.job.core.executor.impl.XxlJobSpringExecutor;
+import com.xxl.job.core.util.NetUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +29,9 @@ public class XxlJobConfig {
     @Value("${xxl.job.executor.port:0}")
     private int port;
 
+    @Value("${server.port:0}")
+    private int serverPort;
+
     @Value("${xxl.job.executor.logpath:./logs/xxl-job/jobhandler}")
     private String logPath;
 
@@ -36,16 +40,25 @@ public class XxlJobConfig {
 
     @Bean
     public XxlJobSpringExecutor xxlJobExecutor() {
-        log.info(">>>>>>>>>>> xxl-job config init, adminAddresses:{}, appname:{}:{}, ip:{}, port:{}",
-                adminAddresses, appname, ip, port);
+        int actualPort = resolveExecutorPort();
+        log.info(">>>>>>>>>>> xxl-job config init, adminAddresses:{}, appname:{}, ip:{}, port:{}",
+                adminAddresses, appname, ip, actualPort);
         XxlJobSpringExecutor executor = new XxlJobSpringExecutor();
         executor.setAdminAddresses(adminAddresses);
         executor.setAccessToken(accessToken);
         executor.setAppname(appname);
         executor.setIp(ip);
-        executor.setPort(port);
+        executor.setPort(actualPort);
         executor.setLogPath(logPath);
         executor.setLogRetentionDays(logRetentionDays);
         return executor;
+    }
+
+    private int resolveExecutorPort() {
+        if (port > 0) {
+            return port;
+        }
+        int basePort = serverPort > 0 ? serverPort + 10000 : 10000;
+        return NetUtil.findAvailablePort(basePort);
     }
 }

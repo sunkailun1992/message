@@ -333,31 +333,45 @@
     <logger name="org.apache.http.impl.conn.Wire" level="WARN"/>
 
 
-    <root level="INFO">
-        <appender-ref ref="STDOUT"/>
-        <!-- 测试环境 -->
-        <springProfile name="dev">
+    <springProfile name="dev">
+        <root level="INFO">
+            <appender-ref ref="STDOUT"/>
             <appender-ref ref="log-error-dev"/>
             <appender-ref ref="log-debug-dev"/>
-        </springProfile>
-        <!-- 测试环境 -->
-        <springProfile name="test">
+        </root>
+    </springProfile>
+
+    <springProfile name="test">
+        <root level="INFO">
+            <appender-ref ref="STDOUT"/>
             <appender-ref ref="log-error-test"/>
             <appender-ref ref="log-debug-test"/>
-        </springProfile>
-        <!-- 预发环境 -->
-        <springProfile name="release">
+        </root>
+    </springProfile>
+
+    <springProfile name="release">
+        <root level="INFO">
+            <appender-ref ref="STDOUT"/>
             <appender-ref ref="log-error-release"/>
             <appender-ref ref="log-debug-release"/>
-        </springProfile>
-        <!-- 正式环境 -->
-        <springProfile name="prod">
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="STDOUT"/>
             <appender-ref ref="log-error-prod"/>
             <appender-ref ref="log-debug-prod"/>
-        </springProfile>
-    </root>
+        </root>
+    </springProfile>
 
-    <logger name="com.gb" level="DEBUG"/>
+    <springProfile name="!dev &amp; !test &amp; !release &amp; !prod">
+        <root level="INFO">
+            <appender-ref ref="STDOUT"/>
+        </root>
+    </springProfile>
+
+    <logger name="com.kellen" level="DEBUG"/>
 
     <logger name="heartbeat" level="ERROR"/>
     <logger name="timer" level="ERROR"/>

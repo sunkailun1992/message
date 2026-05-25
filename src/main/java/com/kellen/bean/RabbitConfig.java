@@ -1,4 +1,4 @@
-package com.gb.bean;
+package com.kellen.bean;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -6,9 +6,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.gb.utils.DataSourceUtil;
-import com.gb.utils.DynamicSourceTtl;
-import com.gb.utils.constants.UniversalConstant;
+import com.kellen.utils.DataSourceUtil;
+import com.kellen.utils.DynamicSourceTtl;
+import com.kellen.utils.constants.UniversalConstant;
 import jodd.util.StringUtil;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.Message;

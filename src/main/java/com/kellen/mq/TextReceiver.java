@@ -1,4 +1,4 @@
-package com.gb.mq;
+package com.kellen.mq;
 
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;

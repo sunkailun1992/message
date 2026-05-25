@@ -1,13 +1,20 @@
 custom:
-  nacos-ip: http://127.0.0.1:8848
+  nacos-ip: 127.0.0.1:8848
   namespace: cfbf4c42-5ebb-4566-a095-30a568556a85
+  nacos-group: DEFAULT_GROUP
 spring:
+  application:
+    name: message
   cloud:
     nacos:
+      discovery:
+        server-addr: ${custom.nacos-ip}
+        namespace: ${custom.namespace}
+        group: ${custom.nacos-group}
       config:
         server-addr: ${custom.nacos-ip}  # 配置中心地址
         file-extension: yaml  # dataid 的名称就是application的name加file-extension
-        group: DEFAULT_GROUP  # 测试组
+        group: ${custom.nacos-group}  # 测试组
         namespace: ${custom.namespace} # 环境的id
         extension-configs:
           # 通用配置

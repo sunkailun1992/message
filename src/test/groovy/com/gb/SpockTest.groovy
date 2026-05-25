@@ -1,6 +1,6 @@
 package com.gb
 
-import com.gb.ApiApplication
+import com.kellen.ApiApplication
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.Specification
