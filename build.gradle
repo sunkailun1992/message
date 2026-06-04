@@ -3,38 +3,74 @@
  */
 plugins {
     id 'java'
-    id 'groovy'
     id 'org.springframework.boot' version '3.2.4'
-    id 'io.spring.dependency-management' version '1.1.4'
-    id "io.freefair.lombok" version "8.6"
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'io.freefair.lombok' version '8.14.4'
 }
+
 /**
  * 项目基础信息
  */
-group = 'com.gbw'
+group = 'com'
 version = '1.0.0'
 description = 'message'
+
+/**
+ * 阿里云 Maven 制品仓库地址。
+ */
+def aliyunMavenReleaseUrl = 'https://packages.aliyun.com/695230d97a1ed8d3da00b21e/maven/2633353-release-no0hfp'
+
+/**
+ * 阿里云 Maven 用户名，从 ~/.gradle/gradle.properties 或环境变量读取，避免明文写入仓库。
+ */
+def aliyunMavenUsername = providers.gradleProperty('aliyunMavenUsername').orElse(providers.environmentVariable('ALIYUN_MAVEN_USERNAME'))
+
+/**
+ * 阿里云 Maven 密码，从 ~/.gradle/gradle.properties 或环境变量读取，避免明文写入仓库。
+ */
+def aliyunMavenPassword = providers.gradleProperty('aliyunMavenPassword').orElse(providers.environmentVariable('ALIYUN_MAVEN_PASSWORD'))
+
+/**
+ * 依赖版本统一管理，避免 dependencies 中散落魔法版本。
+ */
+ext {
+    // Java 源码和字节码版本。
+    javaReleaseVersion = 17
+    // Spring Cloud BOM 版本，与 Spring Boot 3.2.x 保持兼容。
+    springCloudVersion = '2023.0.1'
+    // Spring Cloud Alibaba BOM 版本，与 Spring Cloud 2023.0.x 保持兼容。
+    springCloudAlibabaVersion = '2023.0.1.0'
+    // 公共 utils 包版本，必须与本地或远程 Maven 制品保持一致。
+    utilsVersion = '1.1.9'
+}
+
 /**
  * 编码规则
  */
 tasks.withType(JavaCompile) {
-    options.encoding = "UTF-8"
+    options.encoding = 'UTF-8'
 }
 
+/**
+ * Java 版本配置。
+ */
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.toVersion(javaReleaseVersion)
+    targetCompatibility = JavaVersion.toVersion(javaReleaseVersion)
 }
+
 /**
  * 镜像仓库地址
  */
 repositories {
     mavenLocal()
-    maven { url "https://maven.aliyun.com/nexus/content/groups/public/" }
+    maven { url 'https://plugins.gradle.org/m2/' }
+    maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
     maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
     maven { url 'https://maven.aliyun.com/repository/google' }
     maven { url 'https://maven.aliyun.com/repository/public' }
 }
+
 /**
  * 私人仓库配置
  */
@@ -45,50 +81,52 @@ allprojects {
         }
         maven {
             credentials {
-                username '5f9b8370a3bcee4a48459704'
-                password 'lc3TMO-ktjTN'
+                username = aliyunMavenUsername.orNull
+                password = aliyunMavenPassword.orNull
             }
-            url 'https://packages.aliyun.com/maven/repository/2073071-release-ORqNnV/'
-        }
-        maven {
-            credentials {
-                username '5f9b8370a3bcee4a48459704'
-                password 'lc3TMO-ktjTN'
-            }
-            url 'https://packages.aliyun.com/maven/repository/2073071-snapshot-gL7Tr2/'
+            url aliyunMavenReleaseUrl
         }
     }
 }
+
 /**
  * 打包为 bootJar，可独立运行
  */
 bootJar {
     enabled = true
 }
+
 /**
  * 测试
  */
 test {
     useJUnitPlatform()
 }
+
+/**
+ * Spring Cloud 依赖版本管理。
+ */
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        mavenBom "com.alibaba.cloud:spring-cloud-alibaba-dependencies:${springCloudAlibabaVersion}"
+    }
+}
+
 /**
  * 引入的jar
  */
 dependencies {
-    implementation 'com:utils:1.0.2'
+    // utils：引入统一认证上下文、多租户、公共异常、统一响应、MyBatis-Plus 配置和通用工具能力。
+    implementation "com:utils:${utilsVersion}"
+    // Spring Cloud Bootstrap：支持 bootstrap.yml 在应用主配置前加载 Nacos 等外部配置。
     implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+    // Nacos Discovery：支持服务注册与服务发现。
     implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery'
+    // Nacos Config：支持从 Nacos 配置中心读取应用配置。
     implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config'
-    testImplementation 'org.codehaus.groovy:groovy:3.0.9'
-    testImplementation 'org.codehaus.groovy:groovy-all:3.0.9'
-    testImplementation 'org.spockframework:spock-core:2.0-groovy-3.0'
-    testImplementation 'org.spockframework:spock-spring:2.0-groovy-3.0'
+    // Spring Boot Test：提供 JUnit 5、AssertJ、Mockito、SpringBootTest 等测试能力。
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-}
-
-dependencyManagement {
-    imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.1"
-        mavenBom "com.alibaba.cloud:spring-cloud-alibaba-dependencies:2023.0.1.0"
-    }
+    // Spring Security Test：提供 MockMvc 安全上下文和 @WithMockUser，支持从请求层验证权限控制。
+    testImplementation 'org.springframework.security:spring-security-test'
 }

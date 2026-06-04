@@ -1,8 +1,8 @@
 package com.kellen.bean;
 
+import com.kellen.utils.exception.ApiExceptionHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import com.kellen.utils.exception.GbwExceptionHandler;
 
 /**
  * 异常增强
@@ -15,5 +15,5 @@ import com.kellen.utils.exception.GbwExceptionHandler;
  */
 @Slf4j
 @RestControllerAdvice
-public class GlobalExceptionHandler extends GbwExceptionHandler{
+public class GlobalExceptionHandler extends ApiExceptionHandler {
 }

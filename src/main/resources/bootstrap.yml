@@ -1,5 +1,5 @@
 custom:
-  nacos-ip: 127.0.0.1:8848
+  nacos-ip: 172.16.1.39:8848
   namespace: cfbf4c42-5ebb-4566-a095-30a568556a85
   nacos-group: DEFAULT_GROUP
 spring:
@@ -17,8 +17,16 @@ spring:
         group: ${custom.nacos-group}  # 测试组
         namespace: ${custom.namespace} # 环境的id
         extension-configs:
+          # 日志配置
+          - data-id: logging.yml
+            group: DEFAULT_GROUP
+            refresh: true
           # 通用配置
           - data-id: reuse-configuration.yaml
+            group: DEFAULT_GROUP
+            refresh: true
+          # 公共安全认证配置
+          - data-id: security-auth.yaml
             group: DEFAULT_GROUP
             refresh: true
           # 参数配置
@@ -31,10 +39,6 @@ spring:
             refresh: true
           # redis缓存配置
           - data-id: redis.yaml
-            group: DEFAULT_GROUP
-            refresh: true
-          # mongodb配置
-          - data-id: mongodb.yaml
             group: DEFAULT_GROUP
             refresh: true
           # 分布式事务配置
