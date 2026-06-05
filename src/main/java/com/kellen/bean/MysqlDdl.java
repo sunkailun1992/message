@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.extension.ddl.IDdl;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -63,6 +63,8 @@ public class MysqlDdl implements IDdl {
      */
     @Override
     public List<String> getSqlFiles() {
-        return Collections.emptyList(); // 当前消息模块暂无业务表初始化脚本，后续新增表时按AI规范追加独立SQL文件。
+        List<String> sqlFiles = new ArrayList<>(); // 创建DDL脚本列表，保持脚本执行顺序可控。
+        sqlFiles.add("db/message-schema.sql"); // 注册消息模块初始化脚本，用于自动创建用户消息表。
+        return sqlFiles; // 返回消息模块需要自动维护的DDL脚本。
     }
 }
