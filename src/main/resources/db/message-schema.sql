@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS message_user_message (
     sender_name varchar(255) DEFAULT NULL COMMENT '发送人名称',
     receiver_user_id varchar(64) NOT NULL COMMENT '接收人用户ID',
     owner_user_id varchar(64) DEFAULT NULL COMMENT '负责人用户ID',
+    dept_id varchar(64) DEFAULT NULL COMMENT '归属部门ID',
     title varchar(255) NOT NULL COMMENT '消息标题',
     content text NOT NULL COMMENT '消息内容',
     send_state varchar(32) NOT NULL DEFAULT 'SENT' COMMENT '发送状态：SENT/FAILED',
@@ -24,6 +25,7 @@ CREATE TABLE IF NOT EXISTS message_user_message (
     tenant_id varchar(64) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '1' COMMENT '租户id',
     KEY idx_message_user_message_tenant_receiver (tenant_id, receiver_user_id),
     KEY idx_message_user_message_tenant_sender (tenant_id, sender_user_id),
+    KEY idx_message_user_message_owner_dept (tenant_id, owner_user_id, dept_id),
     KEY idx_message_user_message_type (message_type),
     KEY idx_message_user_message_read_state (read_state),
     KEY idx_message_user_message_send_time (send_date_time)

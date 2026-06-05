@@ -65,6 +65,18 @@ public class UserMessageVO implements Serializable {
     private String receiverUserId;
 
     /**
+     * 负责人用户ID。
+     */
+    @Schema(description = "负责人用户ID")
+    private String ownerUserId;
+
+    /**
+     * 归属部门ID。
+     */
+    @Schema(description = "归属部门ID")
+    private String deptId;
+
+    /**
      * 消息标题。
      */
     @Schema(description = "消息标题")

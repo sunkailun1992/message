@@ -69,6 +69,18 @@ public class UserMessageQuery implements Serializable {
     private String receiverUserId;
 
     /**
+     * 负责人用户ID。
+     */
+    @Schema(description = "负责人用户ID")
+    private String ownerUserId;
+
+    /**
+     * 归属部门ID。
+     */
+    @Schema(description = "归属部门ID")
+    private String deptId;
+
+    /**
      * 发送状态。
      */
     @Schema(description = "发送状态")

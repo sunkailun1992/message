@@ -58,6 +58,12 @@ public class UserMessage extends EntityBase {
     private String ownerUserId;
 
     /**
+     * 归属部门ID。
+     */
+    @Schema(description = "归属部门ID")
+    private String deptId;
+
+    /**
      * 消息标题。
      */
     @Schema(description = "消息标题")

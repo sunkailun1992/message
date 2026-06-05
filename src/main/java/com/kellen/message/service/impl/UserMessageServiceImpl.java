@@ -2,10 +2,12 @@ package com.kellen.message.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.kellen.datapermission.DataPermissionContextHolder;
 import com.kellen.message.entity.UserMessage;
 import com.kellen.message.entity.bo.UserMessageBO;
 import com.kellen.message.entity.enums.MessageReadStateEnum;
 import com.kellen.message.entity.enums.MessageSendStateEnum;
+import com.kellen.message.entity.enums.MessageTypeEnum;
 import com.kellen.message.entity.query.UserMessageQuery;
 import com.kellen.message.entity.vo.UserMessageVO;
 import com.kellen.message.mapper.UserMessageMapper;
@@ -138,6 +140,84 @@ public class UserMessageServiceImpl implements UserMessageService {
     }
 
     /**
+     * 分页查询当前用户接收的消息。
+     *
+     * @param page  分页对象
+     * @param query 用户消息查询参数
+     * @return com.baomidou.mybatisplus.extension.plugins.pagination.Page<com.kellen.message.entity.vo.UserMessageVO>
+     */
+    @Override
+    public Page<UserMessageVO> currentPage(Page<UserMessage> page, UserMessageQuery query) {
+        try {
+            TenantContextHolder.setTenantId(query.getTenantId()); // 设置目标租户上下文。
+            DataPermissionContextHolder.ignore(); // 当前用户收件箱已按 receiver_user_id 强制过滤，避免发送记录归属数据权限误伤。
+            SecurityUser currentUser = requireCurrentUser(); // 读取当前认证用户。
+            QueryWrapper<UserMessage> queryWrapper = buildQueryWrapper(query); // 复用通用查询条件。
+            queryWrapper.eq("receiver_user_id", currentUser.getUserId()); // 当前用户消息必须按认证用户过滤。
+            Page<UserMessage> pageDO = userMessageMapper.selectPage(page, queryWrapper); // 执行分页查询。
+            Page<UserMessageVO> pageVO = userMessageServiceResults.toPageVO(pageDO); // 转换为响应分页。
+            return needAssignment(query) ? userMessageServiceResults.assignment(pageVO) : pageVO; // 根据查询参数决定是否执行结果增强。
+        } finally {
+            DataPermissionContextHolder.clear(); // 清理数据权限忽略标记，避免线程复用影响管理查询。
+            TenantContextHolder.clear(); // 清理租户上下文，避免线程复用串租户。
+        }
+    }
+
+    /**
+     * 查询当前用户未读消息数量。
+     *
+     * @param tenantId    租户ID
+     * @param messageType 消息类型
+     * @return java.lang.Long
+     */
+    @Override
+    public Long currentUnreadCount(String tenantId, MessageTypeEnum messageType) {
+        try {
+            TenantContextHolder.setTenantId(tenantId); // 设置目标租户上下文。
+            DataPermissionContextHolder.ignore(); // 当前用户收件箱已按 receiver_user_id 强制过滤，避免发送记录归属数据权限误伤。
+            SecurityUser currentUser = requireCurrentUser(); // 读取当前认证用户。
+            QueryWrapper<UserMessage> queryWrapper = new QueryWrapper<>(); // 构造未读数量查询。
+            queryWrapper.eq("receiver_user_id", currentUser.getUserId()); // 只统计当前用户接收的消息。
+            queryWrapper.eq("read_state", MessageReadStateEnum.UNREAD.getValue()); // 只统计未读消息。
+            if (messageType != null) {
+                queryWrapper.eq("message_type", messageType.getValue()); // 指定消息类型时按类型过滤。
+            }
+            return userMessageMapper.selectCount(queryWrapper); // 返回未读数量。
+        } finally {
+            DataPermissionContextHolder.clear(); // 清理数据权限忽略标记，避免线程复用影响管理查询。
+            TenantContextHolder.clear(); // 清理租户上下文，避免线程复用串租户。
+        }
+    }
+
+    /**
+     * 标记当前用户消息为已读。
+     *
+     * @param tenantId 租户ID
+     * @param id       消息ID
+     * @return java.lang.Boolean
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean readCurrentMessage(String tenantId, String id) {
+        try {
+            TenantContextHolder.setTenantId(tenantId); // 设置目标租户上下文。
+            DataPermissionContextHolder.ignore(); // 当前用户收件箱已按 receiver_user_id 强制过滤，避免发送记录归属数据权限误伤。
+            SecurityUser currentUser = requireCurrentUser(); // 读取当前认证用户。
+            UserMessage update = new UserMessage(); // 构造局部更新实体。
+            update.setReadState(MessageReadStateEnum.READ); // 更新读取状态。
+            update.setReadDateTime(LocalDateTime.now()); // 更新读取时间。
+            QueryWrapper<UserMessage> queryWrapper = new QueryWrapper<>(); // 构造安全更新条件。
+            queryWrapper.eq("id", id); // 按消息ID更新。
+            queryWrapper.eq("receiver_user_id", currentUser.getUserId()); // 只能更新当前用户自己的消息。
+            queryWrapper.eq("read_state", MessageReadStateEnum.UNREAD.getValue()); // 已读消息不重复更新。
+            return userMessageMapper.update(update, queryWrapper) > 0; // 返回是否实际更新。
+        } finally {
+            DataPermissionContextHolder.clear(); // 清理数据权限忽略标记，避免线程复用影响管理查询。
+            TenantContextHolder.clear(); // 清理租户上下文，避免线程复用串租户。
+        }
+    }
+
+    /**
      * 构建发送消息实体。
      *
      * @param bo             用户消息发送参数
@@ -152,7 +232,8 @@ public class UserMessageServiceImpl implements UserMessageService {
     private UserMessage buildSendMessage(UserMessageBO bo, SecurityUser currentUser, String receiverUserId, LocalDateTime now) {
         UserMessage message = GeneralConvertor.convertor(bo, UserMessage.class); // 将 BO 基础字段转换为实体。
         message.setReceiverUserId(receiverUserId); // 写入当前循环接收人。
-        message.setOwnerUserId(receiverUserId); // 数据权限负责人按接收人归属，便于后续按用户过滤。
+        message.setOwnerUserId(currentUser == null ? null : currentUser.getUserId()); // 消息发送记录按发送人归属，便于发送管理按本人过滤。
+        message.setDeptId(currentUser == null ? null : currentUser.getDeptId()); // 消息发送记录按发送人部门归属，便于发送管理按部门过滤。
         message.setSenderUserId(currentUser == null ? null : currentUser.getUserId()); // 写入当前发送人用户ID。
         message.setSenderName(currentUser == null ? "system" : StringUtils.defaultIfBlank(currentUser.getUsername(), currentUser.getUserId())); // 写入发送人展示名。
         message.setSendState(MessageSendStateEnum.SENT); // 当前实现为同步入库发送，入库成功即视为已发送。
@@ -197,5 +278,18 @@ public class UserMessageServiceImpl implements UserMessageService {
             return true; // 查询对象为空时默认执行结果增强。
         }
         return !Boolean.FALSE.equals(query.getAssignment()); // assignment 明确传 false 时跳过结果增强，其余情况默认增强。
+    }
+
+    /**
+     * 获取当前认证用户。
+     *
+     * @return 当前认证用户
+     */
+    private SecurityUser requireCurrentUser() {
+        SecurityUser currentUser = UserContextHolder.get(); // 从认证上下文读取当前用户。
+        if (currentUser == null || StringUtils.isBlank(currentUser.getUserId())) {
+            throw new IllegalStateException("当前用户未登录"); // 理论上会被安全过滤器拦截，这里兜底保护服务方法。
+        }
+        return currentUser; // 返回当前认证用户。
     }
 }
