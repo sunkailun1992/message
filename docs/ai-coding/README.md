@@ -6,11 +6,12 @@
 
 1. 先读 `AI_CODING_GUIDE.md`，确认执行步骤和禁止事项。
 2. 再读 `PROJECT_CODING_SPEC.md`，确认通用分层、返回值、权限、多租户、注释和检查清单。
-3. 涉及错误码、乐观锁、数据库变更、分支流程时，读 `UTILS_PUBLIC_SPEC.md`。
-4. 当前微服务业务改造时，读项目根目录 `README.md`。
-5. 新增业务模块时参考 `examples/`。
-6. 需要追溯原始迁移资料时再看 `archive/`。
-7. 涉及公共工具类、通用组件、基础配置、跨微服务复用能力时，先检查同级 `utils` 项目是否已有能力；已有则直接复用，缺失时再到 `utils` 实现，并在当前微服务升级依赖和调用。
+3. 涉及接口、权限、消息内容、数据隔离、脱敏、上传下载、SQL、XSS 或测试安全场景时，读 `SECURITY_CODING_SPEC.md`。
+4. 涉及错误码、乐观锁、数据库变更、分支流程时，读 `UTILS_PUBLIC_SPEC.md`。
+5. 当前微服务业务改造时，读项目根目录 `README.md`。
+6. 新增业务模块时参考 `examples/`。
+7. 需要追溯原始迁移资料时再看 `archive/`。
+8. 涉及公共工具类、通用组件、基础配置、跨微服务复用能力时，先检查同级 `utils` 项目是否已有能力；已有则直接复用，缺失时再到 `utils` 实现，并在当前微服务升级依赖和调用。
 
 ## 目录结构
 
@@ -19,6 +20,7 @@ docs/ai-coding/
   README.md
   AI_CODING_GUIDE.md
   PROJECT_CODING_SPEC.md
+  SECURITY_CODING_SPEC.md
   UTILS_PUBLIC_SPEC.md
   examples/
     ExampleBO.java
@@ -49,6 +51,7 @@ docs/ai-coding/
 - 多租户和逻辑删除由框架处理，业务查询不要重复拼 `tenant_id` 或 `is_delete = 0`。
 - 需要数据权限控制的业务主表默认设计 `owner_user_id` 和 `dept_id`；纯关系表、租户表、资源表等没有负责人过滤语义时不要硬加。
 - 权限接口使用 `@PreAuthorize("hasAuthority('权限码')")`。
+- 安全规则独立维护在 `SECURITY_CODING_SPEC.md`，新增或修改接口时必须同步检查接口鉴权、水平越权、租户隔离、脱敏、SQL 注入、XSS、文件上传下载和安全测试。
 - `examples/` 示例按当前分层规范编写，类、字段、方法和关键逻辑都保留注释，AI 写代码时优先模仿该风格。
 - AI 新增或修改 Java 代码时，新增类、字段、方法、方法参数、关键分支、关键赋值、关键返回值都要写清楚注释；复杂或框架衔接逻辑按行补充行尾注释。
 - AI 新增或修改业务代码时，必须同步补充 JUnit 5 测试；接口功能优先从 Controller 请求层使用 MockMvc 验证请求参数、权限、统一响应和 Service 调用，再按风险补充 Service/Mapper 单元测试；外部依赖测试不得默认依赖真实 MQ、Redis、Nacos、数据库等服务。
@@ -59,6 +62,6 @@ docs/ai-coding/
 
 ## 复制规则
 
-- 复制到其他微服务时，可以复用本目录下的 `README.md`、`AI_CODING_GUIDE.md`、`PROJECT_CODING_SPEC.md`、`UTILS_PUBLIC_SPEC.md`、`examples/`。
+- 复制到其他微服务时，可以复用本目录下的 `README.md`、`AI_CODING_GUIDE.md`、`PROJECT_CODING_SPEC.md`、`SECURITY_CODING_SPEC.md`、`UTILS_PUBLIC_SPEC.md`、`examples/`。
 - 当前微服务上下文写在项目根目录 `README.md`，复制规范到其他微服务时不要把当前服务 README 当成通用规范。
 - `PROJECT_CODING_SPEC.md` 不写具体业务接口、默认账号、当前服务权限码等服务私有信息。
