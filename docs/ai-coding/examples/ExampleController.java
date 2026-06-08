@@ -6,7 +6,7 @@ import com.kellen.example.entity.bo.ExampleBO;
 import com.kellen.example.entity.query.ExampleQuery;
 import com.kellen.example.entity.vo.ExampleVO;
 import com.kellen.example.service.ExampleService;
-import com.kellen.utils.ApiResponse;
+import com.kellen.utils.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.annotations.ParameterObject;
