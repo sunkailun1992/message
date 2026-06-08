@@ -16,9 +16,10 @@
 10. 新增或修改 Controller 时，先按 `PROJECT_CODING_SPEC.md` 的 RESTful 接口规范设计路径和 HTTP 方法。
 11. 新增或修改 Controller 时，补齐 `@Tag`、`@Operation`、必要的 `@Parameter` 和请求/响应对象 `@Schema`，确保 Knife4j 页面展示业务名称而不是默认方法名。
 12. 涉及 MySQL、Redis、RabbitMQ、Seata、XXL-JOB、Elasticsearch、Kibana、Zipkin 等基础设施地址时，优先读取项目根目录 `README.md` 的基础设施地址约定，不要在业务配置中新增裸 IP。
-13. 代码编写完成后补充或更新 JUnit 5 测试用例；接口功能优先从 Controller 请求层覆盖请求参数、权限、统一响应和 Service 调用，再按风险补充 Service/Mapper 单元测试。
-14. 检查项目根目录 `README.md`，已有内容时补充本次新增或调整的业务说明，缺少文件时新建。
-15. 编译和测试验证。
+13. 新增或修改 README、AI 规范、配置、脚本、测试、示例和代码时，禁止写入个人电脑绝对路径；目录关系使用相对路径，外部安装位置使用环境变量或 `<PLACEHOLDER>` 占位符。
+14. 代码编写完成后补充或更新 JUnit 5 测试用例；接口功能优先从 Controller 请求层覆盖请求参数、权限、统一响应和 Service 调用，再按风险补充 Service/Mapper 单元测试。
+15. 检查项目根目录 `README.md`，已有内容时补充本次新增或调整的业务说明，缺少文件时新建。
+16. 编译和测试验证。
 
 ## 编码生成规则
 
@@ -91,6 +92,7 @@ private String getRepeatKey(JoinPoint joinPoint) {
 - 不要忽略 `UTILS_PUBLIC_SPEC.md` 中的乐观锁、枚举、错误码和数据库变更记录要求。
 - 不要在 Nacos 业务配置或本地配置中新增散落的基础设施裸 IP；除连接 Nacos 自身的启动入口外，基础设施地址统一放入公共配置并通过变量引用。
 - 不要为标准 CRUD 新增 `/save`、`/update`、`/remove`、`/select`、`/page` 等动词路径；标准 CRUD 必须优先使用 RESTful 资源路径和 HTTP 方法表达。
+- 不要在仓库文件中写入个人电脑绝对路径、下载目录、IDE 路径、JDK 安装路径或本机仓库完整路径；本地私有路径放到环境变量、用户级 Gradle/Maven 配置、IDE 运行配置或未提交的本地配置中。
 
 ## 推荐生成顺序
 

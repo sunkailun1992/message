@@ -28,6 +28,18 @@
 - 业务微服务只保留当前业务专属代码，例如 Controller、Service、Mapper、Entity、BO、Query、VO、业务枚举和业务 SQL。
 - 如果无法判断是否应进入 `utils`，先按“是否会被两个以上微服务复用”判断；会复用则进入 `utils`，不会复用才留在当前微服务。
 
+## 公共 examples 同步规范
+
+`docs/ai-coding/examples` 是公共模板在当前微服务的本地副本，方便 AI 在只读取当前项目时也能学习标准分层、注释和代码风格。
+
+规则：
+
+- 公共 `Example*` 模板的唯一源头是同级 `../utils/docs/ai-coding/examples`。
+- 修改公共模板时，必须先修改 `utils` 源头，再同步到 `user`、`message` 等业务微服务本地副本。
+- 当前项目不得单独长期修改公共 `Example*` 模板，避免不同微服务的 AI 参考样例漂移。
+- 当前项目确实需要消息服务专属示例时，新增 `docs/ai-coding/project-examples` 或 `docs/ai-coding/business-examples`，不要放进公共 `examples`。
+- 同步 examples 后，必须检查 `README.md`、`PROJECT_CODING_SPEC.md` 和 `examples/README.md`，确认同步规则仍然清晰。
+
 ## 技术基线
 
 - Java 17
@@ -50,6 +62,14 @@
 - 不要在多个 `*.yaml` 配置文件中直接写同一个基础设施 IP。
 - 需要区分服务端地址和本机回调地址时，使用不同变量；例如 XXL-JOB Admin 地址使用基础设施地址，执行器回调 IP 使用当前服务所在机器地址。
 - 如果当前微服务复制到其他项目，只调整公共配置中的基础设施变量，不批量替换各业务配置文件。
+
+## 路径与本机环境规范
+
+- README、AI 规范、YAML、properties、SQL、脚本、测试、示例和 Java 代码中不得写入个人电脑绝对路径、下载目录、IDE 路径、JDK 安装路径或本机仓库完整路径。
+- 需要描述同级仓库时，使用 `../utils`、`../gateway`、`../user`、`../message` 这类相对路径，不使用开发者机器上的完整目录。
+- 需要描述可变安装目录、日志目录、上传目录、导出目录、临时目录或 JDK 路径时，使用环境变量、Nacos 配置、`~` 用户目录、`${user.home}`、`${java.io.tmpdir}` 或 `<PLACEHOLDER>` 占位符。
+- 只有运行时从配置读取的业务目录可以进入代码；临时本地调试路径不得提交到仓库，调试样例应改为单元测试或文档占位符。
+- 提交前必须使用 `rg` 搜索本机用户名、用户目录、仓库根目录和系统盘路径关键字，检查是否残留本机路径。
 
 ## 标准分层
 
