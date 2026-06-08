@@ -41,7 +41,7 @@ ext {
     // Spring Cloud Alibaba BOM 版本，与 Spring Cloud 2023.0.x 保持兼容。
     springCloudAlibabaVersion = '2023.0.1.0'
     // 公共 utils 包版本，必须与本地或远程 Maven 制品保持一致。
-    utilsVersion = '1.1.9'
+    utilsVersion = '1.2.0'
 }
 
 /**
