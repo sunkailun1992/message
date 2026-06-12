@@ -1,0 +1,61 @@
+# AGENTS.md
+
+本文件是 `message` 服务的 AI 编码入口。AI 修改本项目代码前，必须先阅读本文件，再按任务风险阅读 `README.md` 和 `docs/ai-coding` 下的规范。
+
+## 项目定位
+
+- 项目名称：`message`
+- 项目类型：消息服务后端
+- 技术栈：Java 17、Spring Boot、Gradle、MyBatis-Plus、RabbitMQ、Nacos、`com:utils`
+- 同级依赖：`../utils` 提供公共响应、认证上下文、租户、多数据源和基础工具；`../gateway` 负责路由；`../admin-web` 负责后台页面
+- 核心风险：消息接收人可见性、发送人数据权限、租户隔离、消息重复推送、模板内容 XSS、MQ 和外部通道失败处理
+
+## 修改前阅读顺序
+
+任何代码修改前必须先阅读：
+
+1. `README.md`：确认当前消息服务职责、接口范围、表结构和验证命令。
+2. `docs/ai-coding/README.md`：确认 AI 编码入口和阅读顺序。
+3. `docs/ai-coding/AI_CODING_GUIDE.md`：确认执行步骤、注释规则、测试和安全要求。
+4. `docs/ai-coding/PROJECT_CODING_SPEC.md`：确认微服务分层、RESTful、权限、多租户、数据权限和 DDL 规范。
+5. `docs/ai-coding/AI_ENGINEERING_GUARDRAILS.md`：确认风险分级、Definition of Done 和交付门禁。
+6. `docs/ai-coding/SECURITY_CODING_SPEC.md`：涉及接口、权限、消息内容、数据隔离、脱敏、SQL、XSS、上传下载或测试安全时必须阅读。
+7. `docs/ai-coding/UTILS_PUBLIC_SPEC.md`：涉及公共规范、错误码、数据库、乐观锁或 `utils` 能力时阅读。
+
+## 项目边界
+
+- `message` 负责消息模板、消息记录、用户消息、接收侧查询、已读状态、发送记录和消息相关业务规则。
+- 当前用户收件箱接口必须从认证上下文取当前用户，不信任前端传入的接收人 ID。
+- 发送侧所有权和接收侧收件箱是不同权限场景，不得用发送人数据权限隐藏接收人的消息。
+- 公共响应、认证上下文、多租户、错误码和工具能力优先复用 `../utils`。
+
+## AI 工程门禁
+
+- 消息发送、批量推送、模板发布、接收侧查询、已读状态、数据权限和 MQ 处理默认中高风险。
+- 新增或修改功能前，必须按 `AI_AUTOMATION_WORKFLOW.md` 整理需求说明、验收标准和开发手册。
+- 完成后必须按 `AI_ENGINEERING_GUARDRAILS.md` 做风险分级、Definition of Done、测试证据、安全检查、风险和回滚说明。
+- 涉及当前用户上下文、租户、数据权限、MQ 或重复推送时，必须有针对性测试或清楚说明未验证项。
+
+## 多智能体协作规则
+
+- 子智能体可以并行分析 Controller、Service、Mapper、DDL、MQ 配置、admin-web 调用和 gateway 路由。
+- 不允许多个 worker 同时修改同一核心 Service、Mapper XML、权限规则或 DDL 脚本。
+- 最终收件箱权限、发送权限、数据权限和测试结论必须由主智能体统一判断。
+
+## 验证命令
+
+按风险选择验证：
+
+```bash
+./gradlew clean compileJava -x test
+./gradlew test
+```
+
+涉及消息发送、MQ、权限或数据权限时，还需要说明接口验证、数据库验证、Nacos/网关路由验证或依赖外部环境的未验证项。
+
+## 禁止事项
+
+- 禁止信任前端传入的当前用户、租户、接收人归属和权限字段。
+- 禁止把消息模板、富文本、回调内容直接作为 HTML 输出或日志全文输出。
+- 禁止写死测试用户、测试租户、消息接收人、RabbitMQ 地址、Nacos 地址或本机路径。
+- 禁止在当前服务复制 `utils` 公共工具源码；公共能力缺失时先评估是否应回到 `../utils` 实现。

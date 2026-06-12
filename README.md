@@ -174,6 +174,7 @@ DELETE /message/manage/templates/{id}
 AI 编码规范入口：
 
 ```text
+AGENTS.md
 docs/ai-coding/README.md
 ```
 
