@@ -17,10 +17,11 @@
 1. `README.md`：确认当前消息服务职责、接口范围、表结构和验证命令。
 2. `docs/ai-coding/README.md`：确认 AI 编码入口和阅读顺序。
 3. `docs/ai-coding/AI_CODING_GUIDE.md`：确认执行步骤、注释规则、测试和安全要求。
-4. `docs/ai-coding/PROJECT_CODING_SPEC.md`：确认微服务分层、RESTful、权限、多租户、数据权限和 DDL 规范。
-5. `docs/ai-coding/AI_ENGINEERING_GUARDRAILS.md`：确认风险分级、Definition of Done 和交付门禁。
-6. `docs/ai-coding/SECURITY_CODING_SPEC.md`：涉及接口、权限、消息内容、数据隔离、脱敏、SQL、XSS、上传下载或测试安全时必须阅读。
-7. `docs/ai-coding/UTILS_PUBLIC_SPEC.md`：涉及公共规范、错误码、数据库、乐观锁或 `utils` 能力时阅读。
+4. `docs/ai-coding/AI_COMMENT_STYLE_GUIDE.md`：确认注释规范、自解释优先、禁止注释掉死代码和排版要求。
+5. `docs/ai-coding/PROJECT_CODING_SPEC.md`：确认微服务分层、RESTful、权限、多租户、数据权限和 DDL 规范。
+6. `docs/ai-coding/AI_ENGINEERING_GUARDRAILS.md`：确认风险分级、Definition of Done 和交付门禁。
+7. `docs/ai-coding/SECURITY_CODING_SPEC.md`：涉及接口、权限、消息内容、数据隔离、脱敏、SQL、XSS、上传下载或测试安全时必须阅读。
+8. `docs/ai-coding/UTILS_PUBLIC_SPEC.md`：涉及公共规范、错误码、数据库、乐观锁或 `utils` 能力时阅读。
 
 ## 项目边界
 

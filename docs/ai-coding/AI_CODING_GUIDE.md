@@ -62,25 +62,15 @@
 
 ## 注释要求
 
-注释规则以 `PROJECT_CODING_SPEC.md` 的“注释规范”为准。新增或修改方法时使用以下 JavaDoc 形态：
+AI 新增或修改 Java、SQL、YAML、脚本、测试和示例等编程内容时，必须遵守 `AI_COMMENT_STYLE_GUIDE.md`。
 
-```java
-/**
- * 获取幂等锁缓存Key
- *
- * @param joinPoint: aop拦截类
- * @return java.lang.String
- * @author sunkailun
- * @DateTime 2026/5/26  下午
- * @email 376253703@qq.com
- */
-private String getRepeatKey(JoinPoint joinPoint) {
-    SecurityUser user = UserContextHolder.get(); // 获取当前认证用户，替代历史 Redis token 用户查询。
-    String tenantId = StringUtils.defaultIfBlank(TenantContextHolder.getTenantId(), "default"); // 缺少租户时使用 default，保证 key 结构稳定。
-    String userFlag = user == null ? "anonymous" : StringUtils.defaultIfBlank(user.getUserId(), user.getUsername()); // 优先使用用户 ID，没有则回退用户名或匿名标识。
-    return "prevent-repeat:" + tenantId + ":" + userFlag + ":" + joinPoint.getTarget().getClass().getName() + "." + joinPoint.getSignature().getName(); // key 粒度为租户、用户、类名和方法名。
-}
-```
+核心原则：
+
+- 修改注释前先识别文件类型和框架上下文；规范未覆盖时，先查官方或主流规范并补充到注释规范文件。
+- 优先让代码自解释，能用类名、方法名、BO/VO/Query 类型、消息状态常量和小方法表达的意图，不用注释补救。
+- 注释解释长期维护需要知道的消息可见性、发送权限、租户隔离、MQ、模板内容、SQL 迁移和失败策略。
+- 禁止逐行翻译式注释，禁止用注释保留废弃实现、调试 main、临时 SQL 或整块旧代码。
+- 注释必须保持缩进、对齐、换行和段落美观一致；不能为了补说明把 Java、XML、SQL 或 YAML 弄乱。
 
 ## 禁止事项
 
