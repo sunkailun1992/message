@@ -117,12 +117,13 @@ private String getRepeatKey(JoinPoint joinPoint) {
 
 ```bash
 ./gradlew clean compileJava test
+bash scripts/check-secrets.sh
 ```
 
-如果依赖 `utils` 有调整，先在 `utils` 执行：
+如果依赖 `utils` 有调整，先在同级 `utils` 项目执行：
 
 ```bash
-mvn -q -DskipTests install
+./gradlew publishToMavenLocal
 ```
 
 再回到当前项目编译。

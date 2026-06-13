@@ -189,9 +189,9 @@ docs/ai-coding/examples
 
 新增或修改 Java 代码时：
 
-- 类、字段、方法必须补充注释。
-- 方法前必须使用 JavaDoc。
-- 关键业务逻辑、认证上下文、租户上下文、权限、Redis、MQ、DDL、事务、异常处理和返回值组装必须补充关键行注释。
+- 类、字段、公开方法和关键业务方法必须补充说明职责、业务含义和边界的注释。
+- 方法前优先使用 JavaDoc；复杂逻辑优先使用逻辑块前置说明。
+- 关键业务逻辑、认证上下文、租户上下文、权限、Redis、MQ、DDL、事务、异常处理和返回值组装必须解释为什么这样做，避免机械逐行注释。
 - 公共能力先检查同级 `utils`，不要在 message 微服务里重复写通用工具类。
 - 修改完成后同步更新本 README。
 
@@ -200,10 +200,11 @@ docs/ai-coding/examples
 ```bash
 ./gradlew clean compileJava -x test --no-daemon
 ./gradlew test --no-daemon
+bash scripts/check-secrets.sh
 ```
 
 如果依赖 `utils` 有调整，先在同级 `utils` 项目执行：
 
 ```bash
-mvn -q -DskipTests install
+./gradlew publishToMavenLocal
 ```
