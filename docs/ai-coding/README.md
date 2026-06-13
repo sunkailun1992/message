@@ -5,15 +5,16 @@
 ## 快速阅读
 
 1. 先读 `AI_CODING_GUIDE.md`，确认执行步骤和禁止事项。
-2. 再读 `AI_AUTOMATION_WORKFLOW.md`，按需求说明、验收标准、开发手册、测试说明和交付说明组织自动化开发。
-3. 再读 `AI_ENGINEERING_GUARDRAILS.md`，确认风险分级、Definition of Done、测试门禁、安全门禁和交付说明。
-4. 再读 `PROJECT_CODING_SPEC.md`，确认通用分层、返回值、权限、多租户、注释和检查清单。
-5. 涉及接口、权限、消息内容、数据隔离、脱敏、上传下载、SQL、XSS 或测试安全场景时，读 `SECURITY_CODING_SPEC.md`。
-6. 涉及错误码、乐观锁、数据库变更、分支流程时，读 `UTILS_PUBLIC_SPEC.md`。
-7. 当前微服务业务改造时，读项目根目录 `README.md`。
-8. 新增业务模块时参考 `examples/`；该目录是从 `utils/docs/ai-coding/examples` 同步的本地副本。
-9. 需要追溯原始迁移资料时再看 `archive/`。
-10. 涉及公共工具类、通用组件、基础配置、跨微服务复用能力时，先检查同级 `utils` 项目是否已有能力；已有则直接复用，缺失时再到 `utils` 实现，并在当前微服务升级依赖和调用。
+2. 再读 `AI_DESIGN_PATTERN_GUIDE.md`，确认消息服务适用的设计模式和禁止过度抽象规则。
+3. 再读 `AI_AUTOMATION_WORKFLOW.md`，按需求说明、验收标准、开发手册、测试说明和交付说明组织自动化开发。
+4. 再读 `AI_ENGINEERING_GUARDRAILS.md`，确认风险分级、Definition of Done、测试门禁、安全门禁和交付说明。
+5. 再读 `PROJECT_CODING_SPEC.md`，确认通用分层、返回值、权限、多租户、注释和检查清单。
+6. 涉及接口、权限、消息内容、数据隔离、脱敏、上传下载、SQL、XSS 或测试安全场景时，读 `SECURITY_CODING_SPEC.md`。
+7. 涉及错误码、乐观锁、数据库变更、分支流程时，读 `UTILS_PUBLIC_SPEC.md`。
+8. 当前微服务业务改造时，读项目根目录 `README.md`。
+9. 新增业务模块时参考 `examples/`；该目录是从 `utils/docs/ai-coding/examples` 同步的本地副本。
+10. 需要追溯原始迁移资料时再看 `archive/`。
+11. 涉及公共工具类、通用组件、基础配置、跨微服务复用能力时，先检查同级 `utils` 项目是否已有能力；已有则直接复用，缺失时再到 `utils` 实现，并在当前微服务升级依赖和调用。
 
 ## 目录结构
 
@@ -21,6 +22,7 @@
 docs/ai-coding/
   README.md
   AI_CODING_GUIDE.md
+  AI_DESIGN_PATTERN_GUIDE.md
   AI_AUTOMATION_WORKFLOW.md
   AI_ENGINEERING_GUARDRAILS.md
   PROJECT_CODING_SPEC.md
@@ -60,6 +62,7 @@ docs/ai-coding/
 - `examples/` 是公共示例模板的本地副本，源头在同级 `../utils/docs/ai-coding/examples`；公共模板变更必须先改 `utils`，再同步到当前项目。
 - AI 新增或修改 Java、SQL、配置、脚本、测试和示例等编程内容时，必须先阅读 `AI_COMMENT_STYLE_GUIDE.md`。
 - 注释优先解释消息可见性、发送权限、租户隔离、MQ、模板内容和失败策略；优先让代码自解释，禁止机械逐行、行尾堆叠和注释掉的死代码。
+- AI 新增或重构消息模板、发送流程、收件箱、MQ、通知通道和状态迁移前，必须阅读 `AI_DESIGN_PATTERN_GUIDE.md`。
 - AI 新增或修改 README、AI 规范、配置、脚本、测试、示例和代码时，禁止写入个人电脑绝对路径、本机下载目录、本机 JDK 路径或本机仓库完整路径；需要表达目录关系时使用相对路径、环境变量或 `<PLACEHOLDER>` 占位符。
 - AI 开始功能开发前必须按 `AI_AUTOMATION_WORKFLOW.md` 先整理需求说明、验收标准和开发手册；如果用户需求很小，可以在回复中简化呈现，但内部检查项不能跳过。
 - AI 完成功能后必须按 `AI_ENGINEERING_GUARDRAILS.md` 做风险分级、Definition of Done、测试证据、安全检查、风险和回滚说明。
@@ -71,7 +74,7 @@ docs/ai-coding/
 
 ## 复制规则
 
-- 复制到其他微服务时，可以复用本目录下的 `README.md`、`AI_CODING_GUIDE.md`、`AI_AUTOMATION_WORKFLOW.md`、`AI_ENGINEERING_GUARDRAILS.md`、`PROJECT_CODING_SPEC.md`、`SECURITY_CODING_SPEC.md`、`UTILS_PUBLIC_SPEC.md`、`examples/`。
+- 复制到其他微服务时，可以复用本目录下的 `README.md`、`AI_CODING_GUIDE.md`、`AI_DESIGN_PATTERN_GUIDE.md`、`AI_AUTOMATION_WORKFLOW.md`、`AI_ENGINEERING_GUARDRAILS.md`、`PROJECT_CODING_SPEC.md`、`SECURITY_CODING_SPEC.md`、`UTILS_PUBLIC_SPEC.md`、`examples/`。
 - 复制或修改 `examples/` 时，必须以 `utils/docs/ai-coding/examples` 为唯一公共源头；当前项目只保留方便 AI 阅读的本地副本。
 - 当前微服务上下文写在项目根目录 `README.md`，复制规范到其他微服务时不要把当前服务 README 当成通用规范。
 - `PROJECT_CODING_SPEC.md` 不写具体业务接口、默认账号、当前服务权限码等服务私有信息。
