@@ -5,16 +5,17 @@
 ## 快速阅读
 
 1. 先读 `AI_CODING_GUIDE.md`，确认执行步骤和禁止事项。
-2. 再读 `AI_DESIGN_PATTERN_GUIDE.md`，确认消息服务适用的设计模式和禁止过度抽象规则。
-3. 再读 `AI_AUTOMATION_WORKFLOW.md`，按需求说明、验收标准、开发手册、测试说明和交付说明组织自动化开发。
-4. 再读 `AI_ENGINEERING_GUARDRAILS.md`，确认风险分级、Definition of Done、测试门禁、安全门禁和交付说明。
-5. 再读 `PROJECT_CODING_SPEC.md`，确认通用分层、返回值、权限、多租户、注释和检查清单。
-6. 涉及接口、权限、消息内容、数据隔离、脱敏、上传下载、SQL、XSS 或测试安全场景时，读 `SECURITY_CODING_SPEC.md`。
-7. 涉及错误码、乐观锁、数据库变更、分支流程时，读 `UTILS_PUBLIC_SPEC.md`。
-8. 当前微服务业务改造时，读项目根目录 `README.md`。
-9. 新增业务模块时参考 `examples/`；该目录是从 `utils/docs/ai-coding/examples` 同步的本地副本。
-10. 需要追溯原始迁移资料时再看 `archive/`。
-11. 涉及公共工具类、通用组件、基础配置、跨微服务复用能力时，先检查同级 `utils` 项目是否已有能力；已有则直接复用，缺失时再到 `utils` 实现，并在当前微服务升级依赖和调用。
+2. 再读 `AI_DIRECTORY_STRUCTURE_GUIDE.md`，确认 Java 微服务目录、测试、资源、文档和跨项目边界。
+3. 再读 `AI_DESIGN_PATTERN_GUIDE.md`，确认消息服务适用的设计模式和禁止过度抽象规则。
+4. 再读 `AI_AUTOMATION_WORKFLOW.md`，按需求说明、验收标准、开发手册、测试说明和交付说明组织自动化开发。
+5. 再读 `AI_ENGINEERING_GUARDRAILS.md`，确认风险分级、Definition of Done、测试门禁、安全门禁和交付说明。
+6. 再读 `PROJECT_CODING_SPEC.md`，确认通用分层、返回值、权限、多租户、注释和检查清单。
+7. 涉及接口、权限、消息内容、数据隔离、脱敏、上传下载、SQL、XSS 或测试安全场景时，读 `SECURITY_CODING_SPEC.md`。
+8. 涉及错误码、乐观锁、数据库变更、分支流程时，读 `UTILS_PUBLIC_SPEC.md`。
+9. 当前微服务业务改造时，读项目根目录 `README.md`。
+10. 新增业务模块时参考 `examples/`；该目录是从 `utils/docs/ai-coding/examples` 同步的本地副本。
+11. 需要追溯原始迁移资料时再看 `archive/`。
+12. 涉及公共工具类、通用组件、基础配置、跨微服务复用能力时，先检查同级 `utils` 项目是否已有能力；已有则直接复用，缺失时再到 `utils` 实现，并在当前微服务升级依赖和调用。
 
 ## 目录结构
 
@@ -22,6 +23,7 @@
 docs/ai-coding/
   README.md
   AI_CODING_GUIDE.md
+  AI_DIRECTORY_STRUCTURE_GUIDE.md
   AI_DESIGN_PATTERN_GUIDE.md
   AI_AUTOMATION_WORKFLOW.md
   AI_ENGINEERING_GUARDRAILS.md
