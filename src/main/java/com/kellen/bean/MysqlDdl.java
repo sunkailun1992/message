@@ -15,8 +15,6 @@ import java.util.function.Consumer;
  *
  * @author sunkailun
  * @className MysqlDdl
- * @DateTime 2026/06/04
- * @email 376253703@qq.com
  */
 @Component
 public class MysqlDdl implements IDdl {
@@ -32,8 +30,6 @@ public class MysqlDdl implements IDdl {
      * @param dataSource 当前项目数据源
      * @return void
      * @author sunkailun
-     * @DateTime 2026/06/04
-     * @email 376253703@qq.com
      */
     public MysqlDdl(DataSource dataSource) {
         this.dataSource = dataSource; // 保存当前应用数据源，交给MyBatis-Plus DDL运行器执行脚本。
@@ -45,8 +41,6 @@ public class MysqlDdl implements IDdl {
      * @param consumer MyBatis-Plus DDL脚本执行器
      * @return void
      * @author sunkailun
-     * @DateTime 2026/06/04
-     * @email 376253703@qq.com
      */
     @Override
     public void runScript(Consumer<DataSource> consumer) {
@@ -58,8 +52,6 @@ public class MysqlDdl implements IDdl {
      *
      * @return java.util.List<java.lang.String>
      * @author sunkailun
-     * @DateTime 2026/06/04
-     * @email 376253703@qq.com
      */
     @Override
     public List<String> getSqlFiles() {

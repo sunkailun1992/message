@@ -18,8 +18,6 @@ import java.time.LocalDateTime;
  *
  * @author sunkailun
  * @className UserMessage
- * @DateTime 2026/06/04
- * @email 376253703@qq.com
  */
 @Getter
 @Setter

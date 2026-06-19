@@ -16,12 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 
 /**
- * <p>
- * 项目启动项
- * </p>
+ * 消息服务启动类。
  *
- * @author 孙凯伦
- * @since 2021-04-02
+ * <p>注册消息发送、收件箱、模板和 MQ 相关组件，并开启缓存、异步、
+ * 定时任务、Feign、事务和 MyBatis Mapper 扫描。</p>
  */
 @EnableCaching
 @SpringBootApplication(exclude = {SeataFeignClientAutoConfiguration.class, DataSourceAutoConfiguration.class})
@@ -34,10 +32,20 @@ import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 @MapperScan("com.kellen.*.mapper")
 public class ApiApplication {
 
+	/**
+	 * JVM 进程入口，启动消息服务。
+	 *
+	 * @param args 命令行参数
+	 */
 	public static void main(String[] args) {
 		SpringApplication.run(ApiApplication.class, args);
 	}
 
+	/**
+	 * 注册 WebSocket 端点导出器。
+	 *
+	 * @return WebSocket 端点导出器
+	 */
 	@Bean
 	public ServerEndpointExporter serverEndpointExporter() {
 		return new ServerEndpointExporter();

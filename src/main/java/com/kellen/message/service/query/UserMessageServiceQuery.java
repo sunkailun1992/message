@@ -11,8 +11,6 @@ import org.springframework.stereotype.Component;
  *
  * @author sunkailun
  * @className UserMessageServiceQuery
- * @DateTime 2026/06/04
- * @email 376253703@qq.com
  */
 @Component
 public class UserMessageServiceQuery {

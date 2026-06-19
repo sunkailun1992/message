@@ -8,8 +8,6 @@ import com.kellen.message.entity.UserMessage;
  *
  * @author sunkailun
  * @className UserMessageMapper
- * @DateTime 2026/06/04
- * @email 376253703@qq.com
  */
 public interface UserMessageMapper extends BaseMapper<UserMessage> {
 }

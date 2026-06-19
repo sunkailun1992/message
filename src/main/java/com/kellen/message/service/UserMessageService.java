@@ -14,8 +14,6 @@ import java.util.List;
  *
  * @author sunkailun
  * @className UserMessageService
- * @DateTime 2026/06/04
- * @email 376253703@qq.com
  */
 public interface UserMessageService {
 

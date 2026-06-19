@@ -31,8 +31,6 @@ import java.util.Objects;
  *
  * @author sunkailun
  * @className UserMessageServiceImpl
- * @DateTime 2026/06/04
- * @email 376253703@qq.com
  */
 @Service
 public class UserMessageServiceImpl implements UserMessageService {
@@ -60,8 +58,6 @@ public class UserMessageServiceImpl implements UserMessageService {
      * @param userMessageServiceResults 用户消息结果增强
      * @return void
      * @author sunkailun
-     * @DateTime 2026/06/04
-     * @email 376253703@qq.com
      */
     public UserMessageServiceImpl(UserMessageMapper userMessageMapper, UserMessageServiceQuery userMessageServiceQuery, UserMessageServiceResults userMessageServiceResults) {
         this.userMessageMapper = userMessageMapper; // 保存用户消息Mapper。
@@ -76,8 +72,6 @@ public class UserMessageServiceImpl implements UserMessageService {
      * @param query 用户消息查询参数
      * @return com.baomidou.mybatisplus.extension.plugins.pagination.Page<com.kellen.message.entity.vo.UserMessageVO>
      * @author sunkailun
-     * @DateTime 2026/06/04
-     * @email 376253703@qq.com
      */
     @Override
     public Page<UserMessageVO> page(Page<UserMessage> page, UserMessageQuery query) {
@@ -97,8 +91,6 @@ public class UserMessageServiceImpl implements UserMessageService {
      * @param query 用户消息查询参数
      * @return java.util.List<com.kellen.message.entity.vo.UserMessageVO>
      * @author sunkailun
-     * @DateTime 2026/06/04
-     * @email 376253703@qq.com
      */
     @Override
     public List<UserMessageVO> list(UserMessageQuery query) {
@@ -118,8 +110,6 @@ public class UserMessageServiceImpl implements UserMessageService {
      * @param bo 用户消息发送参数
      * @return java.lang.Integer
      * @author sunkailun
-     * @DateTime 2026/06/04
-     * @email 376253703@qq.com
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -226,8 +216,6 @@ public class UserMessageServiceImpl implements UserMessageService {
      * @param now            发送时间
      * @return com.kellen.message.entity.UserMessage
      * @author sunkailun
-     * @DateTime 2026/06/04
-     * @email 376253703@qq.com
      */
     private UserMessage buildSendMessage(UserMessageBO bo, SecurityUser currentUser, String receiverUserId, LocalDateTime now) {
         UserMessage message = GeneralConvertor.convertor(bo, UserMessage.class); // 将 BO 基础字段转换为实体。
@@ -248,8 +236,6 @@ public class UserMessageServiceImpl implements UserMessageService {
      * @param query 用户消息查询参数
      * @return com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<com.kellen.message.entity.UserMessage>
      * @author sunkailun
-     * @DateTime 2026/06/04
-     * @email 376253703@qq.com
      */
     private QueryWrapper<UserMessage> buildQueryWrapper(UserMessageQuery query) {
         UserMessage entity = GeneralConvertor.convertor(query, UserMessage.class); // 将查询参数转换为实体。
@@ -270,8 +256,6 @@ public class UserMessageServiceImpl implements UserMessageService {
      * @param query 用户消息查询参数
      * @return boolean
      * @author sunkailun
-     * @DateTime 2026/06/04
-     * @email 376253703@qq.com
      */
     private boolean needAssignment(UserMessageQuery query) {
         if (Objects.isNull(query)) {

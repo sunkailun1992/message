@@ -29,8 +29,6 @@ import java.util.List;
  *
  * @author sunkailun
  * @className UserMessageController
- * @DateTime 2026/06/04
- * @email 376253703@qq.com
  */
 @RestController
 @RequestMapping("/messages/user-messages")
@@ -48,8 +46,6 @@ public class UserMessageController {
      * @param userMessageService 用户消息业务服务
      * @return void
      * @author sunkailun
-     * @DateTime 2026/06/04
-     * @email 376253703@qq.com
      */
     public UserMessageController(UserMessageService userMessageService) {
         this.userMessageService = userMessageService; // 注入用户消息业务服务。
@@ -61,8 +57,6 @@ public class UserMessageController {
      * @param query 用户消息查询参数
      * @return 用户消息列表
      * @author sunkailun
-     * @DateTime 2026/06/04
-     * @email 376253703@qq.com
      */
     @GetMapping("/options")
     @PreAuthorize("hasAnyAuthority('user:auth:manage','message:user-message:list')")
@@ -77,8 +71,6 @@ public class UserMessageController {
      * @param query 用户消息查询参数
      * @return 用户消息分页
      * @author sunkailun
-     * @DateTime 2026/06/04
-     * @email 376253703@qq.com
      */
     @GetMapping(params = {"current", "size"})
     @PreAuthorize("hasAnyAuthority('user:auth:manage','message:user-message:list')")
@@ -133,8 +125,6 @@ public class UserMessageController {
      * @param bo 用户消息发送参数
      * @return 发送数量
      * @author sunkailun
-     * @DateTime 2026/06/04
-     * @email 376253703@qq.com
      */
     @PostMapping
     @PreAuthorize("hasAnyAuthority('user:auth:manage','message:user-message:send')")

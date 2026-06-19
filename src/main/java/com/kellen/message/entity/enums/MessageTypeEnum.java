@@ -9,8 +9,6 @@ import lombok.Getter;
  *
  * @author sunkailun
  * @className MessageTypeEnum
- * @DateTime 2026/06/04
- * @email 376253703@qq.com
  */
 @Getter
 @AllArgsConstructor

@@ -17,10 +17,11 @@
 - 禁止逐行翻译式注释，例如“获取消息”“返回结果”“调用 mapper”。
 - 禁止用注释保留废弃实现、调试 main、临时 SQL 或整块旧代码；历史版本交给 Git。
 - 注释必须随代码同步更新，过时注释必须删除或修正。
+- 作者、创建时间、邮箱和修改历史交给 Git 记录；Javadoc 不写 `@DateTime`、`@email`、`@ClassName`、`@explain` 等非标准标签。
 
 ## 2. Java、Mapper 和 SQL 注释
 
-- Controller、Service、ServiceQuery、Mapper、Entity、BO、VO、MQ 处理和模板逻辑应使用类级或方法级 Javadoc 说明职责和边界。
+- Controller、Service、ServiceQuery、Mapper、Entity、BO、VO、MQ 处理和模板逻辑应使用类级或方法级 Javadoc 说明职责、边界和安全约束。
 - 收件箱查询、发送侧权限、租户隔离、模板内容、已读状态和重复推送相关注释必须说明为什么这样做，以及不能绕过什么保护。
 - MyBatis XML 注释只解释复杂 SQL、权限条件、租户条件和性能边界，不解释普通标签语法。
 - SQL 迁移注释解释目的、影响范围、幂等条件和回滚风险；已执行脚本不因注释风格改原文件。

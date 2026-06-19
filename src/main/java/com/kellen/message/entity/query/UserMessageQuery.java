@@ -15,8 +15,6 @@ import java.io.Serializable;
  *
  * @author sunkailun
  * @className UserMessageQuery
- * @DateTime 2026/06/04
- * @email 376253703@qq.com
  */
 @Data
 @Schema(description = "用户消息查询参数")
