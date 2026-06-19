@@ -83,7 +83,7 @@
 ## AI 生成代码检查
 
 - 是否符合当前微服务包名和模块分层。
-- 是否使用 Java 17、Spring Boot 3、`jakarta.*`。
+- 是否使用 Java 17、Spring Boot 4、`jakarta.*`。
 - 是否继承或复用项目公共能力，而不是重复造工具。
 - 是否使用 `ApiResponse`、`ReturnCode`、`IEnum`、`EntityBase` 等项目约定。
 - 是否补齐类、字段、方法和关键行注释。

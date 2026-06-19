@@ -3,7 +3,7 @@
  */
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.2.4'
+    id 'org.springframework.boot' version '4.0.4'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'io.freefair.lombok' version '8.14.4'
 }
@@ -36,12 +36,16 @@ def aliyunMavenPassword = providers.gradleProperty('aliyunMavenPassword').orElse
 ext {
     // Java 源码和字节码版本。
     javaReleaseVersion = 17
-    // Spring Cloud BOM 版本，与 Spring Boot 3.2.x 保持兼容。
-    springCloudVersion = '2023.0.1'
-    // Spring Cloud Alibaba BOM 版本，与 Spring Cloud 2023.0.x 保持兼容。
-    springCloudAlibabaVersion = '2023.0.1.0'
+    // Spring Cloud BOM 版本，与 Spring Boot 4.0.x 保持兼容。
+    springCloudVersion = '2025.1.1'
+    // Spring Cloud Alibaba BOM 版本，与 Spring Cloud 2025.1.x 保持兼容。
+    springCloudAlibabaVersion = '2025.1.0.0'
+    // Nacos Client 版本，显式对齐当前 Nacos 3.2.2 服务端。
+    nacosClientVersion = '3.2.2'
+    // Seata Client 版本；当前已发布 starter 最新为 2.6.0，可注册到 Seata Server 2.7.0。
+    seataVersion = '2.6.0'
     // 公共 utils 包版本，必须与本地或远程 Maven 制品保持一致。
-    utilsVersion = '1.2.0'
+    utilsVersion = '1.3.0'
 }
 
 /**
@@ -57,6 +61,10 @@ tasks.withType(JavaCompile) {
 java {
     sourceCompatibility = JavaVersion.toVersion(javaReleaseVersion)
     targetCompatibility = JavaVersion.toVersion(javaReleaseVersion)
+}
+
+springBoot {
+    mainClass = 'com.kellen.ApiApplication'
 }
 
 /**
@@ -113,14 +121,26 @@ dependencyManagement {
     }
 }
 
+configurations.configureEach {
+    resolutionStrategy.eachDependency { details ->
+        if (details.requested.group == 'com.alibaba.nacos'
+                && (details.requested.name == 'nacos-client' || details.requested.name.startsWith('nacos-'))) {
+            details.useVersion nacosClientVersion
+            details.because 'Nacos client must match the 3.2.2 server line used by the shared microservice environment.'
+        }
+        if (details.requested.group == 'org.apache.seata') {
+            details.useVersion seataVersion
+            details.because 'Use the latest published Apache Seata starter; it is compatible with the 2.7.0 server line used by the shared microservice environment.'
+        }
+    }
+}
+
 /**
  * 引入的jar
  */
 dependencies {
     // utils：引入统一认证上下文、多租户、公共异常、统一响应、MyBatis-Plus 配置和通用工具能力。
     implementation "com:utils:${utilsVersion}"
-    // Spring Cloud Bootstrap：支持 bootstrap.yml 在应用主配置前加载 Nacos 等外部配置。
-    implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
     // Nacos Discovery：支持服务注册与服务发现。
     implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery'
     // Nacos Config：支持从 Nacos 配置中心读取应用配置。

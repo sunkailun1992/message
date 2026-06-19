@@ -2,14 +2,17 @@
 
 `message` 是消息中心微服务，负责承接系统内的消息投递、消息消费、消息模板、消息记录和异步通知能力。
 
-当前项目只保留消息模块基础工程、RabbitMQ 基础配置、统一异常处理、DDL 入口和 AI 编码规范；不包含 `user` 服务中的用户、租户、角色、权限资源等业务类。
+当前项目只保留消息模块基础工程、统一异常处理、DDL 入口和 AI 编码规范；不包含 `user` 服务中的用户、租户、角色、权限资源等业务类。
 
 ## 技术基线
 
 - Java 17
-- Spring Boot 3.2.4
-- Spring Cloud 2023.0.1
-- Spring Cloud Alibaba 2023.0.1.0
+- Spring Boot 4.0.4
+- Spring Cloud 2025.1.1
+- Spring Cloud Alibaba 2025.1.0.0
+- Nacos Client 3.2.2
+- Seata Server 2.7.0
+- Seata Client 2.6.0
 - MyBatis-Plus
 - 公共能力依赖 `com:utils`
 - 测试框架统一使用 JUnit 5
@@ -30,7 +33,7 @@
 
 ## 基础设施地址
 
-除 `bootstrap.yml` 中连接 Nacos 自身的入口地址外，MySQL、Redis、RabbitMQ、Seata、XXL-JOB、Elasticsearch、Kibana、Zipkin 等基础设施地址统一放在 Nacos `reuse-configuration.yaml`。
+除 `application.yml` 中连接 Nacos 自身的启动入口外，MySQL、Redis、RabbitMQ、Seata、XXL-JOB、Elasticsearch、Kibana、Zipkin 等基础设施地址统一放在 Nacos `reuse-configuration.yaml`。
 
 蒲公英、Tailscale、节点小宝等组网地址变化时，优先只修改公共配置中的基础设施变量，例如：
 
@@ -54,7 +57,7 @@ custom:
 
 ## Nacos 配置
 
-本地 `bootstrap.yml` 只保存连接 Nacos 需要的启动入口和远程配置列表。当前 message 加载：
+本地 `application.yml` 只保存连接 Nacos 需要的启动入口和 `spring.config.import` 远程配置列表。当前 message 加载：
 
 ```text
 logging.yml
@@ -71,26 +74,25 @@ mybatis-plus.yaml
 feign.yaml
 rabbitmq.yaml
 elasticsearch.yaml
-knife4j.yaml
 ```
 
 ## RabbitMQ
 
-RabbitMQ 基础配置在：
+RabbitMQ 公共增强配置统一放在 `utils`：
 
 ```text
-src/main/java/com/kellen/bean/RabbitConfig.java
+utils/src/main/java/com/kellen/config/rabbit/RabbitMqConfig.java
 ```
 
 当前配置负责：
 
-- 创建 RabbitMQ 连接工厂。
-- 注册 `RabbitAdmin`。
-- 注册带 JSON 转换器的 `RabbitTemplate`。
-- 发送消息时透传当前动态数据源和 `traceId`。
-- 消费消息时恢复动态数据源和 `traceId`。
+- 复用 Spring Boot 标准 `spring.rabbitmq.*` 自动配置。
+- 注册 RabbitMQ JSON 消息转换器。
+- 发送消息时透传当前动态数据源、`traceId` 和租户上下文。
+- 消费消息时恢复动态数据源、`traceId` 和租户上下文。
+- 消费完成后清理线程上下文，避免消费线程复用串数据。
 
-新增队列、交换机、绑定关系时，优先按业务模块命名，避免复用测试队列名。
+业务服务只声明自己的 exchange、queue、binding 和 listener；不得在业务服务复制公共 MQ 配置。
 
 ## DDL
 
@@ -112,17 +114,13 @@ src/main/java/com/kellen/bean/MysqlDdl.java
 
 ## 接口文档
 
-Knife4j 文档地址：
-
-```text
-http://127.0.0.1:7400/doc.html
-```
-
 OpenAPI 原始文档地址：
 
 ```text
 http://127.0.0.1:7400/v3/api-docs
 ```
+
+第三方文档 UI 已移除，服务只保留标准 OpenAPI3 `/v3/api-docs`。
 
 Controller 必须使用 OpenAPI3 注解：
 
@@ -166,7 +164,7 @@ DELETE /message/manage/templates/{id}
 - 不使用 `/save`、`/update`、`/remove`、`/select`、`/page` 等动词路径。
 - 查询使用 `GET` URL 参数，不给普通查询接口加 `@RequestBody`。
 - 分页接口使用 `@GetMapping(params = {"current", "size"})` 表达分页参数存在性。
-- `Query.current` 和 `Query.size` 不使用 `@NotNull(groups = Select.class)`，避免 Knife4j 把复用 Query 的 `/options` 接口也标记为必填。
+- `Query.current` 和 `Query.size` 不使用 `@NotNull(groups = Select.class)`，避免 OpenAPI 工具把复用 Query 的 `/options` 接口也标记为必填。
 - `options` 只表示轻量选择项集合，不承接完整管理列表。
 
 ## AI 编码规范

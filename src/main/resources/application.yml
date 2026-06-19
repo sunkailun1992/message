@@ -1,5 +1,66 @@
+# message 服务本地启动端口。
 server:
   port: 7400
+
+# 连接 Nacos 前必须先有的启动入口配置。
+# 这里不能引用 reuse-configuration.yaml，因为远程配置还没有加载。
+custom:
+  # Nacos 服务端地址，默认使用蒲公英内网地址；部署时可用 NACOS_SERVER_ADDR 覆盖。
+  nacos-ip: ${NACOS_SERVER_ADDR:172.16.1.39:8848}
+  # Nacos 命名空间，隔离本套微服务配置和注册实例。
+  namespace: ${NACOS_NAMESPACE:cfbf4c42-5ebb-4566-a095-30a568556a85}
+  # Nacos 默认分组，大部分公共配置放 DEFAULT_GROUP。
+  nacos-group: ${NACOS_GROUP:DEFAULT_GROUP}
+
 spring:
+  application:
+    # 服务注册名，也是其他微服务通过 lb://message 访问 message 服务的名称。
+    name: message
   main:
+    # 兼容公共 utils 和业务侧可能重复声明的基础 Bean。
     allow-bean-definition-overriding: true
+  cloud:
+    nacos:
+      # 服务注册与发现配置。
+      discovery:
+        server-addr: ${custom.nacos-ip}
+        namespace: ${custom.namespace}
+        group: ${custom.nacos-group}
+      # 配置中心入口，负责加载 spring.config.import 中列出的远程 YAML。
+      config:
+        server-addr: ${custom.nacos-ip}
+        namespace: ${custom.namespace}
+        group: ${custom.nacos-group}
+        file-extension: yaml
+  config:
+    import:
+      # logging.yml：日志级别、日志路径等通用日志配置。
+      - "optional:nacos:logging.yml?group=DEFAULT_GROUP&refreshEnabled=true"
+      # reuse-configuration.yaml：MySQL、Redis、RabbitMQ、Seata、Admin 等基础设施公共地址变量。
+      - "optional:nacos:reuse-configuration.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
+      # security-auth.yaml：统一认证开关、JWT、网关透传头和白名单配置。
+      - "optional:nacos:security-auth.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
+      # message.yaml：message 服务业务配置，例如消息模板、投递策略等非 Spring 体系参数。
+      - "optional:nacos:message.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
+      # message-spring.yaml：message 服务端口、数据源、线程池等 Spring 体系配置。
+      - "optional:nacos:message-spring.yaml?group=test&refreshEnabled=true"
+      # redis.yaml：Redis 客户端配置，供缓存、幂等或分布式能力使用。
+      - "optional:nacos:redis.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
+      # seata.yaml：分布式事务客户端配置，连接 Seata Server 2.7.0。
+      - "optional:nacos:seata.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
+      # xxl-job.yaml：XXL-JOB 执行器注册地址和执行器端口配置。
+      - "optional:nacos:xxl-job.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
+      # zipkin.yaml：链路追踪上报地址和采样配置。
+      - "optional:nacos:zipkin.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
+      # admin.yaml：Spring Boot Admin 客户端注册配置。
+      - "optional:nacos:admin.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
+      # mybatis-plus.yaml：MyBatis-Plus、分页、DDL 等公共 ORM 配置。
+      - "optional:nacos:mybatis-plus.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
+      # qdrant.yaml：向量库公共配置，业务当前不一定使用，但保持和微服务基线一致。
+      - "optional:nacos:qdrant.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
+      # feign.yaml：OpenFeign 超时、日志和调用策略配置。
+      - "optional:nacos:feign.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
+      # rabbitmq.yaml：RabbitMQ 标准 spring.rabbitmq.* 连接和监听重试配置。
+      - "optional:nacos:rabbitmq.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
+      # elasticsearch.yaml：Elasticsearch 客户端和日志索引配置。
+      - "optional:nacos:elasticsearch.yaml?group=DEFAULT_GROUP&refreshEnabled=true"

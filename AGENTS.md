@@ -44,6 +44,7 @@
 
 - 子智能体可以并行分析 Controller、Service、Mapper、DDL、MQ 配置、admin-web 调用和 gateway 路由。
 - 不允许多个 worker 同时修改同一核心 Service、Mapper XML、权限规则或 DDL 脚本。
+- 消息服务全新业务库初始化必须先执行 `db/common-infra-schema.sql` 再执行消息业务脚本；所有接入 MyBatis-Plus DDL 与 Seata AT 的业务库都必须具备 `ddl_history` 和 `undo_log`。
 - 最终收件箱权限、发送权限、数据权限和测试结论必须由主智能体统一判断。
 
 ## 验证命令
