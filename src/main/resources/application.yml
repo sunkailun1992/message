@@ -56,8 +56,6 @@ spring:
       - "optional:nacos:admin.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
       # mybatis-plus.yaml：MyBatis-Plus、分页、DDL 等公共 ORM 配置。
       - "optional:nacos:mybatis-plus.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
-      # qdrant.yaml：向量库公共配置，业务当前不一定使用，但保持和微服务基线一致。
-      - "optional:nacos:qdrant.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
       # feign.yaml：OpenFeign 超时、日志和调用策略配置。
       - "optional:nacos:feign.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
       # rabbitmq.yaml：RabbitMQ 标准 spring.rabbitmq.* 连接和监听重试配置。
