@@ -24,6 +24,7 @@
 8. `docs/ai-coding/AI_ENGINEERING_GUARDRAILS.md`：确认风险分级、Definition of Done 和交付门禁。
 9. `docs/ai-coding/SECURITY_CODING_SPEC.md`：涉及接口、权限、消息内容、数据隔离、脱敏、SQL、XSS、上传下载或测试安全时必须阅读。
 10. `docs/ai-coding/UTILS_PUBLIC_SPEC.md`：涉及公共规范、错误码、数据库、乐观锁或 `utils` 能力时阅读。
+11. `docs/ai-coding/NACOS_CONFIG_SPEC.md`：修改 Nacos 配置中心、共享 dataId 或 `application.yml` import 前必读。
 
 ## 项目边界
 
@@ -64,5 +65,5 @@ bash scripts/check-secrets.sh
 - 禁止信任前端传入的当前用户、租户、接收人归属和权限字段。
 - 禁止把消息模板、富文本、回调内容直接作为 HTML 输出或日志全文输出。
 - 禁止写死测试用户、测试租户、消息接收人、RabbitMQ 地址、Nacos 地址或本机路径。
-- 禁止 AI 自主修改已有密钥、RabbitMQ 地址、Nacos 地址、数据库连接或生产配置值；发现疑似密钥只能告警，由项目负责人决定是否替换。
+- 禁止 AI 触碰真实密钥/凭证、RabbitMQ/数据库密码（疑似密钥只能告警，由项目负责人处理）；配置中心结构性调整（dataId 拆分/合并、import 顺序、`${}` 引用、Nacos/RabbitMQ 接入地址、namespace/group）允许 AI 自主完成，但必须保值不改值，不得擅自变更生产业务配置的实际取值。
 - 禁止在当前服务复制 `utils` 公共工具源码；公共能力缺失时先评估是否应回到 `../utils` 实现。
