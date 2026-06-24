@@ -56,6 +56,8 @@ spring:
       - "optional:nacos:zipkin.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
       # admin.yaml：Spring Boot Admin 客户端注册配置。
       - "optional:nacos:admin.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
+      # dubbo.yaml：Dubbo RPC 注册、协议、超时和重试等共享配置。
+      - "optional:nacos:dubbo.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
       # mybatis-plus.yaml：MyBatis-Plus、分页、DDL 等公共 ORM 配置。
       - "optional:nacos:mybatis-plus.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
       # rabbitmq.yaml：RabbitMQ 标准 spring.rabbitmq.* 连接和监听重试配置。

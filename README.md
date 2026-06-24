@@ -71,7 +71,7 @@ xxl-job.yaml
 zipkin.yaml
 admin.yaml
 mybatis-plus.yaml
-feign.yaml
+dubbo.yaml
 rabbitmq.yaml
 elasticsearch.yaml
 ```
