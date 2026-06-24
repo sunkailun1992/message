@@ -33,6 +33,7 @@
 - 当前用户收件箱接口必须从认证上下文取当前用户，不信任前端传入的接收人 ID。
 - 发送侧所有权和接收侧收件箱是不同权限场景，不得用发送人数据权限隐藏接收人的消息。
 - 公共响应、认证上下文、多租户、错误码和工具能力优先复用 `../utils`。
+- 新增本服务 OpenAPI 入口、调整服务前缀，或新增同级 Java 微服务需要接入网关时，必须同步检查 `../gateway` 的 Nacos `gateway-spring.yaml`；需要聚合到 Swagger UI 的服务要补业务路由和 `springdoc.swagger-ui.urls`，并验证对应网关文档路径与 `/swagger-ui/index.html`。
 
 ## AI 工程门禁
 
