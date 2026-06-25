@@ -13,14 +13,15 @@
 7. 再读 `ENVIRONMENT_CONFIG_SPEC.md`，确认环境、Nacos namespace、Java profile 和前端/小程序边界。
 8. 再读 `VERSIONING_SPEC.md`，确认 `group = 'com'`、`version = '1.0.0'`、补丁递增和公共包消费者同步规则。
 9. 再读 `RPC_API_CODING_SPEC.md`，确认 Dubbo RPC 契约、provider/consumer、`../rpc-api` 和 `../utils` 边界。
-10. 再读 `PROJECT_CODING_SPEC.md`，确认通用分层、返回值、权限、多租户、注释和检查清单。
-11. 涉及接口、权限、消息内容、数据隔离、脱敏、上传下载、SQL、XSS 或测试安全场景时，读 `SECURITY_CODING_SPEC.md`。
-12. 涉及错误码、乐观锁、数据库变更、分支流程时，读 `UTILS_PUBLIC_SPEC.md`。
-13. 当前微服务业务改造时，读项目根目录 `README.md`。
-14. 新增业务模块时参考 `examples/`；该目录是从 `utils/docs/ai-coding/examples` 同步的本地副本。
-15. 需要追溯原始迁移资料时再看 `archive/`。
-16. 涉及公共工具类、通用组件、基础配置、跨微服务复用能力时，先检查同级 `utils` 项目是否已有能力；已有则直接复用，缺失时再到 `utils` 实现，并在当前微服务升级依赖和调用。
-17. 涉及跨服务 Dubbo RPC 接口或 DTO 时，先检查同级 `rpc-api` 项目是否已有契约；缺失时先改 `rpc-api`，再升级当前服务依赖和调用点。
+10. 再读 `TESTING_SPEC.md`，确认业务模块 SpringBootTest、真实 HTTP 集成测试、测试库和 AssertJ 边界。
+11. 再读 `PROJECT_CODING_SPEC.md`，确认通用分层、返回值、权限、多租户、注释和检查清单。
+12. 涉及接口、权限、消息内容、数据隔离、脱敏、上传下载、SQL、XSS 或测试安全场景时，读 `SECURITY_CODING_SPEC.md`。
+13. 涉及错误码、乐观锁、数据库变更、分支流程时，读 `UTILS_PUBLIC_SPEC.md`。
+14. 当前微服务业务改造时，读项目根目录 `README.md`。
+15. 新增业务模块时参考 `examples/`；该目录是从 `utils/docs/ai-coding/examples` 同步的本地副本。
+16. 需要追溯原始迁移资料时再看 `archive/`。
+17. 涉及公共工具类、通用组件、基础配置、跨微服务复用能力时，先检查同级 `utils` 项目是否已有能力；已有则直接复用，缺失时再到 `utils` 实现，并在当前微服务升级依赖和调用。
+18. 涉及跨服务 Dubbo RPC 接口或 DTO 时，先检查同级 `rpc-api` 项目是否已有契约；缺失时先改 `rpc-api`，再升级当前服务依赖和调用点。
 
 ## 目录结构
 
@@ -36,6 +37,7 @@ docs/ai-coding/
   ENVIRONMENT_CONFIG_SPEC.md
   VERSIONING_SPEC.md
   RPC_API_CODING_SPEC.md
+  TESTING_SPEC.md
   PROJECT_CODING_SPEC.md
   SECURITY_CODING_SPEC.md
   UTILS_PUBLIC_SPEC.md
@@ -81,7 +83,7 @@ docs/ai-coding/
 - Dubbo RPC 契约统一维护在同级 `../rpc-api`；`message` 只作为 consumer 调用契约，不在 `utils` 或本服务重复定义接口/DTO。
 - AI 开始功能开发前必须按 `AI_AUTOMATION_WORKFLOW.md` 先整理需求说明、验收标准和开发手册；如果用户需求很小，可以在回复中简化呈现，但内部检查项不能跳过。
 - AI 完成功能后必须按 `AI_ENGINEERING_GUARDRAILS.md` 做风险分级、Definition of Done、测试证据、安全检查、风险和回滚说明。
-- AI 新增或修改业务代码时，必须同步补充 JUnit 5 测试；接口功能优先从 Controller 请求层使用 MockMvc 验证请求参数、权限、统一响应和 Service 调用，再按风险补充 Service/Mapper 单元测试；外部依赖测试不得默认依赖真实 MQ、Redis、Nacos、数据库等服务。
+- AI 新增或修改业务代码时，必须按 `TESTING_SPEC.md` 同步补充 JUnit 5 测试；核心接口优先使用 `@SpringBootTest(webEnvironment = RANDOM_PORT)` 发真实 HTTP 请求，MockMvc/WebMvcTest 只作为 slice 补充；核心 Service 使用 `@SpringBootTest` 注入真实 Bean；`assertThat` 只是断言工具，不能替代真实业务链路验证。
 - AI 自动化编写完功能代码后，必须同步检查项目根目录 `README.md`；已有则补充本次业务说明，没有则新建。
 - 公共工具类、通用组件、基础能力不得直接写进业务微服务；编写前先检查同级 `utils` 项目，优先复用已有能力，减少当前微服务代码量。
 - 数据权限属于公共 MyBatis-Plus 能力，统一在 `utils` 中维护；业务微服务只维护部门、角色数据范围和具体业务表字段。

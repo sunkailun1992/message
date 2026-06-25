@@ -349,12 +349,13 @@ test {
 - 新增或修改业务代码时，必须同步新增或更新测试用例。
 - 测试类放在 `src/test/java`，包名与被测类保持一致。
 - 测试类命名使用 `XxxTest`；集成测试可使用 `XxxIntegrationTest`，但不得默认依赖未准备好的外部服务。
-- 接口功能测试必须优先从 Controller 请求层开始，使用 `MockMvc` 发起 HTTP 请求，验证请求参数、权限、统一响应、错误场景和 Controller 到 Service 的参数传递。
-- Controller 请求层测试优先使用 `@WebMvcTest`，并使用测试最小配置隔离主启动类中的 MapperScan、WebSocket、调度任务、Nacos、数据库等基础设施。
+- 测试分层以 `TESTING_SPEC.md` 为准；核心业务链路必须有 Spring Boot 级别测试，不能只靠纯对象断言或 mock。
+- 核心接口功能测试优先使用 `@SpringBootTest(webEnvironment = RANDOM_PORT)` 发真实 HTTP 请求，验证请求参数、权限、统一响应、错误场景和 Controller 到 Service 的参数传递。
+- `MockMvc`、`@WebMvcTest` 可以用于局部 Controller slice 验证，但只能作为补充，不能替代核心接口的真实 HTTP 集成测试。
 - 纯转换类或工具类测试只能作为补充，不能替代接口请求层测试。
 - 普通单元测试使用 JUnit 5、Mockito、AssertJ，不启动完整 Spring 容器。
-- Service 测试优先 mock Mapper、外部客户端、Redis、MQ、Nacos、第三方服务，重点验证业务分支、事务边界、租户上下文、乐观锁版本号和异常路径。
-- 只有确实需要验证 Spring 装配时才使用 `@SpringBootTest`，避免所有测试都启动完整应用。
+- 核心 Service 测试优先使用 `@SpringBootTest` 注入真实 Spring Bean，验证业务分支、事务边界、租户上下文、Mapper、乐观锁版本号和异常路径。
+- 外部客户端、Redis、MQ、Nacos、第三方服务可使用 stub、fake、mock、测试容器或显式开关隔离，避免测试不可重复。
 - 外部依赖测试必须使用 test profile、mock、测试容器或显式开关，不能默认要求本机存在 MQ、Redis、Nacos、数据库等服务。
 - 测试方法名表达业务语义，推荐 `shouldXxxWhenYyy` 风格。
 - 断言必须验证关键输出和副作用，不允许只调用方法但没有断言。
