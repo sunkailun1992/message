@@ -9,13 +9,14 @@
 3. 再读 `AI_DESIGN_PATTERN_GUIDE.md`，确认消息服务适用的设计模式和禁止过度抽象规则。
 4. 再读 `AI_AUTOMATION_WORKFLOW.md`，按需求说明、验收标准、开发手册、测试说明和交付说明组织自动化开发。
 5. 再读 `AI_ENGINEERING_GUARDRAILS.md`，确认风险分级、Definition of Done、测试门禁、安全门禁和交付说明。
-6. 再读 `PROJECT_CODING_SPEC.md`，确认通用分层、返回值、权限、多租户、注释和检查清单。
-7. 涉及接口、权限、消息内容、数据隔离、脱敏、上传下载、SQL、XSS 或测试安全场景时，读 `SECURITY_CODING_SPEC.md`。
-8. 涉及错误码、乐观锁、数据库变更、分支流程时，读 `UTILS_PUBLIC_SPEC.md`。
-9. 当前微服务业务改造时，读项目根目录 `README.md`。
-10. 新增业务模块时参考 `examples/`；该目录是从 `utils/docs/ai-coding/examples` 同步的本地副本。
-11. 需要追溯原始迁移资料时再看 `archive/`。
-12. 涉及公共工具类、通用组件、基础配置、跨微服务复用能力时，先检查同级 `utils` 项目是否已有能力；已有则直接复用，缺失时再到 `utils` 实现，并在当前微服务升级依赖和调用。
+6. 再读 `VERSIONING_SPEC.md`，确认 `group = 'com'`、`version = '1.0.0'`、补丁递增和公共包消费者同步规则。
+7. 再读 `PROJECT_CODING_SPEC.md`，确认通用分层、返回值、权限、多租户、注释和检查清单。
+8. 涉及接口、权限、消息内容、数据隔离、脱敏、上传下载、SQL、XSS 或测试安全场景时，读 `SECURITY_CODING_SPEC.md`。
+9. 涉及错误码、乐观锁、数据库变更、分支流程时，读 `UTILS_PUBLIC_SPEC.md`。
+10. 当前微服务业务改造时，读项目根目录 `README.md`。
+11. 新增业务模块时参考 `examples/`；该目录是从 `utils/docs/ai-coding/examples` 同步的本地副本。
+12. 需要追溯原始迁移资料时再看 `archive/`。
+13. 涉及公共工具类、通用组件、基础配置、跨微服务复用能力时，先检查同级 `utils` 项目是否已有能力；已有则直接复用，缺失时再到 `utils` 实现，并在当前微服务升级依赖和调用。
 
 ## 目录结构
 
@@ -27,6 +28,7 @@ docs/ai-coding/
   AI_DESIGN_PATTERN_GUIDE.md
   AI_AUTOMATION_WORKFLOW.md
   AI_ENGINEERING_GUARDRAILS.md
+  VERSIONING_SPEC.md
   PROJECT_CODING_SPEC.md
   SECURITY_CODING_SPEC.md
   UTILS_PUBLIC_SPEC.md
@@ -66,6 +68,7 @@ docs/ai-coding/
 - 注释优先解释消息可见性、发送权限、租户隔离、MQ、模板内容和失败策略；优先让代码自解释，禁止机械逐行、行尾堆叠和注释掉的死代码。
 - AI 新增或重构消息模板、发送流程、收件箱、MQ、通知通道和状态迁移前，必须阅读 `AI_DESIGN_PATTERN_GUIDE.md`。
 - AI 新增或修改 README、AI 规范、配置、脚本、测试、示例和代码时，禁止写入个人电脑绝对路径、本机下载目录、本机 JDK 路径或本机仓库完整路径；需要表达目录关系时使用相对路径、环境变量或 `<PLACEHOLDER>` 占位符。
+- 项目版本、公共包依赖和后端 Java 新项目基础坐标按 `VERSIONING_SPEC.md` 处理；纯 AI 规范或 README 改动不提升制品版本。
 - AI 开始功能开发前必须按 `AI_AUTOMATION_WORKFLOW.md` 先整理需求说明、验收标准和开发手册；如果用户需求很小，可以在回复中简化呈现，但内部检查项不能跳过。
 - AI 完成功能后必须按 `AI_ENGINEERING_GUARDRAILS.md` 做风险分级、Definition of Done、测试证据、安全检查、风险和回滚说明。
 - AI 新增或修改业务代码时，必须同步补充 JUnit 5 测试；接口功能优先从 Controller 请求层使用 MockMvc 验证请求参数、权限、统一响应和 Service 调用，再按风险补充 Service/Mapper 单元测试；外部依赖测试不得默认依赖真实 MQ、Redis、Nacos、数据库等服务。
