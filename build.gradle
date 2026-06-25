@@ -45,7 +45,7 @@ ext {
     // Seata Client 版本；当前已发布 starter 最新为 2.6.0，可注册到 Seata Server 2.7.0。
     seataVersion = '2.6.0'
     // 公共 utils 包版本，必须与本地或远程 Maven 制品保持一致。
-    utilsVersion = '1.4.0'
+    utilsVersion = '1.5.0'
 }
 
 /**
