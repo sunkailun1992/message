@@ -58,7 +58,6 @@ public class MysqlDdl implements IDdl {
         List<String> sqlFiles = new ArrayList<>(); // 创建DDL脚本列表，保持脚本执行顺序可控。
         sqlFiles.add("db/common-infra-schema.sql"); // 注册公共基础表脚本，保证业务库具备 ddl_history 和 Seata AT undo_log。
         sqlFiles.add("db/message-schema.sql"); // 注册消息模块初始化脚本，用于自动创建用户消息表。
-        sqlFiles.add("db/message-20260605-add-user-message-dept.sql"); // 追加消息表数据权限部门字段升级脚本。
         return sqlFiles; // 返回消息模块需要自动维护的DDL脚本。
     }
 }

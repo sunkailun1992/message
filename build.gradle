@@ -151,6 +151,8 @@ dependencies {
     implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config'
     // Spring Boot Test：提供 JUnit 5、AssertJ、Mockito、SpringBootTest 等测试能力。
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    // JUnit Platform Launcher：对齐 Gradle 与 JUnit 运行时，避免测试发现阶段因 launcher/engine 版本不一致失败。
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     // Spring Security Test：提供 MockMvc 安全上下文和 @WithMockUser，支持从请求层验证权限控制。
     testImplementation 'org.springframework.security:spring-security-test'
 }
