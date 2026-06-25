@@ -59,7 +59,7 @@
 
 规则：
 
-- 连接 Nacos 自身所需的启动入口保留在本地 `application.yml`，并通过 `spring.config.import` 导入远程 Nacos 配置。
+- 连接 Nacos 自身所需的通用骨架保留在本地 `application.yml`；Nacos 地址、namespace、config/discovery 绑定和 `spring.config.import` 必须放在 `application-dev/test/prod.yml` 对应环境文件中。
 - MySQL、Redis、RabbitMQ、Seata、XXL-JOB、Elasticsearch、Kibana、Zipkin 等基础设施地址优先放入 Nacos 公共配置，例如 `reuse-configuration.yaml`。
 - 业务配置只引用公共变量，例如 `${custom.infra-host}`、`${custom.infra-mysql-addr}`、`${custom.infra-xxl-job-admin}`、`${custom.local-service-host}`。
 - 不要在多个 `*.yaml` 配置文件中直接写同一个基础设施 IP。
