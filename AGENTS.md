@@ -6,8 +6,8 @@
 
 - 项目名称：`message`
 - 项目类型：消息服务后端
-- 技术栈：Java 17、Spring Boot、Gradle、MyBatis-Plus、RabbitMQ、Nacos、`com:utils`
-- 同级依赖：`../utils` 提供公共响应、认证上下文、租户、多数据源和基础工具；`../gateway` 负责路由；`../admin-web` 负责后台页面
+- 技术栈：Java 17、Spring Boot、Gradle、MyBatis-Plus、RabbitMQ、Nacos、Dubbo、`com:utils`、`com:rpc-api`
+- 同级依赖：`../rpc-api` 提供跨服务 RPC 接口和 DTO 契约；`../utils` 提供公共响应、认证上下文、租户、多数据源和基础工具；`../gateway` 负责路由；`../admin-web` 负责后台页面
 - 核心风险：消息接收人可见性、发送人数据权限、租户隔离、消息重复推送、模板内容 XSS、MQ 和外部通道失败处理
 
 ## 修改前阅读顺序
@@ -23,11 +23,12 @@
 7. `docs/ai-coding/BRANCHING_SPEC.md`：确认分支命名、短分支生命周期、release/hotfix、tag 和清理规则。
 8. `docs/ai-coding/ENVIRONMENT_CONFIG_SPEC.md`：确认环境、Nacos namespace、Java profile 和前端/小程序边界。
 9. `docs/ai-coding/VERSIONING_SPEC.md`：确认 `group = 'com'`、`version = '1.0.0'`、补丁递增和消费者同步规则。
-10. `docs/ai-coding/PROJECT_CODING_SPEC.md`：确认微服务分层、RESTful、权限、多租户、数据权限和 DDL 规范。
-11. `docs/ai-coding/AI_ENGINEERING_GUARDRAILS.md`：确认风险分级、Definition of Done 和交付门禁。
-12. `docs/ai-coding/SECURITY_CODING_SPEC.md`：涉及接口、权限、消息内容、数据隔离、脱敏、SQL、XSS、上传下载或测试安全时必须阅读。
-13. `docs/ai-coding/UTILS_PUBLIC_SPEC.md`：涉及公共规范、错误码、数据库、乐观锁或 `utils` 能力时阅读。
-14. `docs/ai-coding/NACOS_CONFIG_SPEC.md`：修改 Nacos 配置中心、共享 dataId 或 `application.yml` import 前必读。
+10. `docs/ai-coding/RPC_API_CODING_SPEC.md`：涉及 Dubbo RPC provider、consumer、接口或 DTO 时必须阅读。
+11. `docs/ai-coding/PROJECT_CODING_SPEC.md`：确认微服务分层、RESTful、权限、多租户、数据权限和 DDL 规范。
+12. `docs/ai-coding/AI_ENGINEERING_GUARDRAILS.md`：确认风险分级、Definition of Done 和交付门禁。
+13. `docs/ai-coding/SECURITY_CODING_SPEC.md`：涉及接口、权限、消息内容、数据隔离、脱敏、SQL、XSS、上传下载或测试安全时必须阅读。
+14. `docs/ai-coding/UTILS_PUBLIC_SPEC.md`：涉及公共规范、错误码、数据库、乐观锁或 `utils` 能力时阅读。
+15. `docs/ai-coding/NACOS_CONFIG_SPEC.md`：修改 Nacos 配置中心、共享 dataId 或 `application.yml` import 前必读。
 
 ## 项目边界
 
@@ -36,6 +37,7 @@
 - 当前用户收件箱接口必须从认证上下文取当前用户，不信任前端传入的接收人 ID。
 - 发送侧所有权和接收侧收件箱是不同权限场景，不得用发送人数据权限隐藏接收人的消息。
 - 公共响应、认证上下文、多租户、错误码和工具能力优先复用 `../utils`。
+- 跨服务 Dubbo RPC 调用优先复用 `../rpc-api` 中的接口和 DTO，不在本服务复制契约。
 - 新增本服务 OpenAPI 入口、调整服务前缀，或新增同级 Java 微服务需要接入网关时，必须同步检查 `../gateway` 的 Nacos `gateway-spring.yaml`；需要聚合到 Swagger UI 的服务要补业务路由和 `springdoc.swagger-ui.urls`，并验证对应网关文档路径与 `/swagger-ui/index.html`。
 
 ## AI 工程门禁
@@ -62,7 +64,7 @@
 bash scripts/check-secrets.sh
 ```
 
-涉及消息发送、MQ、权限或数据权限时，还需要说明接口验证、数据库验证、Nacos/网关路由验证或依赖外部环境的未验证项。
+涉及 `rpc-api` 契约、消息发送、MQ、权限或数据权限时，还需要说明契约编译、接口验证、数据库验证、Nacos/网关路由验证或依赖外部环境的未验证项。
 
 ## 禁止事项
 
@@ -70,4 +72,4 @@ bash scripts/check-secrets.sh
 - 禁止把消息模板、富文本、回调内容直接作为 HTML 输出或日志全文输出。
 - 禁止写死测试用户、测试租户、消息接收人、RabbitMQ 地址、Nacos 地址或本机路径。
 - 禁止 AI 触碰真实密钥/凭证、RabbitMQ/数据库密码（疑似密钥只能告警，由项目负责人处理）；配置中心结构性调整（dataId 拆分/合并、import 顺序、`${}` 引用、Nacos/RabbitMQ 接入地址、namespace/group）允许 AI 自主完成，但必须保值不改值，不得擅自变更生产业务配置的实际取值。
-- 禁止在当前服务复制 `utils` 公共工具源码；公共能力缺失时先评估是否应回到 `../utils` 实现。
+- 禁止在当前服务复制 `utils` 公共工具源码或 `rpc-api` 契约源码；业务 RPC 契约缺失时回到真实 `../rpc-api` 实现，公共能力缺失时先评估是否应回到 `../utils` 实现。
