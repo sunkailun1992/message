@@ -102,7 +102,14 @@ MyBatis-Plus DDL 入口在：
 src/main/java/com/kellen/bean/MysqlDdl.java
 ```
 
-当前消息模块暂无业务表初始化脚本，`getSqlFiles()` 返回空列表。
+当前消息模块 `MysqlDdl#getSqlFiles()` 声明公共基础设施脚本和消息业务脚本：
+
+```text
+db/common-infra-schema.sql
+db/message-schema.sql
+```
+
+全新或空业务库首次启动前，必须先在目标业务库手动执行同级 `../utils/src/main/resources/db/common-infra-schema.sql`，先建 `ddl_history` 和 Seata AT `undo_log`。Seata AT 会在 `DataSource` 初始化时先检查 `undo_log`，不能依赖应用首次启动自动创建该表。
 
 后续新增消息业务表时：
 
