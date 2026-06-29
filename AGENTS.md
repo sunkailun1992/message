@@ -35,6 +35,7 @@
 
 - `message` 负责消息模板、消息记录、用户消息、接收侧查询、已读状态、发送记录和消息相关业务规则。
 - 新增消息渠道、模板类型、发送流程、收件箱状态、MQ 或第三方通知能力时，必须优先沿用 `docs/ai-coding/AI_DESIGN_PATTERN_GUIDE.md` 中的 Service Layer、Strategy、Observer、State、Pipeline、Adapter 等项目适用模式。
+- 新增业务表必须按 `docs/ai-coding/PROJECT_CODING_SPEC.md` 补齐公共治理字段；`version` 只做乐观锁，业务版本使用 `*_version` 命名。
 - 当前用户收件箱接口必须从认证上下文取当前用户，不信任前端传入的接收人 ID。
 - 发送侧所有权和接收侧收件箱是不同权限场景，不得用发送人数据权限隐藏接收人的消息。
 - 公共响应、认证上下文、多租户、错误码和工具能力优先复用 `../utils`。

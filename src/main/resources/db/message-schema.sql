@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS message_user_message (
     modify_date_time datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     modify_name varchar(255) DEFAULT NULL COMMENT '修改人',
     is_delete bit(1) DEFAULT b'0' COMMENT '删除状态',
+    type int DEFAULT '0' COMMENT '类型（0：默认）',
+    state int DEFAULT '1' COMMENT '状态（1：启用，2：禁用）',
     label varchar(255) DEFAULT NULL COMMENT '标签',
     sorting int DEFAULT '0' COMMENT '排序',
     version int DEFAULT '1' COMMENT '版本号',
