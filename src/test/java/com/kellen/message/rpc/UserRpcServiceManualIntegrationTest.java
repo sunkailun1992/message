@@ -1,6 +1,6 @@
 package com.kellen.message.rpc;
 
-import com.kellen.ApiApplication;
+import com.kellen.MessageApplication;
 import com.kellen.rpc.user.UserRpcDTO;
 import com.kellen.rpc.user.UserRpcService;
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @Tag("manual-rpc")
 @DisabledIfEnvironmentVariable(named = "CI", matches = "true")
-@SpringBootTest(classes = ApiApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = MessageApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class UserRpcServiceManualIntegrationTest {
 
     private static final Logger log = LoggerFactory.getLogger(UserRpcServiceManualIntegrationTest.class);
