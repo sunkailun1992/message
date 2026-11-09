@@ -4,20 +4,19 @@ import com.baomidou.mybatisplus.extension.ddl.IDdl;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * MyBatis-Plus自动维护DDL。
+ * MyBatis-Plus 自动维护 PostgreSQL DDL。
  * <p>
- * message 当前只保留DDL入口，后续新增消息业务表时再追加独立SQL脚本。
+ * message 维护 PostgreSQL 用户消息表；公共基础表必须在服务启动前先执行。
  *
  * @author sunkailun
- * @className MysqlDdl
+ * @className PostgresqlDdl
  */
 @Component
-public class MysqlDdl implements IDdl {
+public class PostgresqlDdl implements IDdl {
 
     /**
      * 当前项目数据源。
@@ -31,7 +30,7 @@ public class MysqlDdl implements IDdl {
      * @return void
      * @author sunkailun
      */
-    public MysqlDdl(DataSource dataSource) {
+    public PostgresqlDdl(DataSource dataSource) {
         this.dataSource = dataSource; // 保存当前应用数据源，交给MyBatis-Plus DDL运行器执行脚本。
     }
 
@@ -55,9 +54,9 @@ public class MysqlDdl implements IDdl {
      */
     @Override
     public List<String> getSqlFiles() {
-        List<String> sqlFiles = new ArrayList<>(); // 创建DDL脚本列表，保持脚本执行顺序可控。
-        sqlFiles.add("db/common-infra-schema.sql"); // 注册公共基础表脚本，保证业务库具备 ddl_history 和 Seata AT undo_log。
-        sqlFiles.add("db/message-schema.sql"); // 注册消息模块初始化脚本，用于自动创建用户消息表。
-        return sqlFiles; // 返回消息模块需要自动维护的DDL脚本。
+        return List.of(
+                "db/postgresql/common-infra-schema.sql",
+                "db/postgresql/message-schema.sql"
+        );
     }
 }

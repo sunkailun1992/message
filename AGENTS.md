@@ -48,7 +48,7 @@
 
 ## 项目边界
 
-- 个人公共库固定使用 `com:utils:1.5.3` 与 `com:rpc-api:1.0.7`；公司库保留 `com.kellen:utils` 与 `com.kellen:rpc-api`。双方共用同一阿里云私有 Maven 地址，沿用各自 group 坐标隔离，不改 Java package，也不迁移到另一仓库或 GitHub Packages。
+- 个人公共库固定使用 `com:utils:1.6.0` 与 `com:rpc-api:1.0.7`；公司库保留 `com.kellen:utils` 与 `com.kellen:rpc-api`。双方共用同一阿里云私有 Maven 地址，沿用各自 group 坐标隔离，不改 Java package，也不迁移到另一仓库或 GitHub Packages。
 
 - `message` 负责消息模板、消息记录、用户消息、接收侧查询、已读状态、发送记录和消息相关业务规则。
 - 新增消息渠道、模板类型、发送流程、收件箱状态、MQ 或第三方通知能力时，必须优先沿用 `docs/ai-coding/AI_DESIGN_PATTERN_GUIDE.md` 中的 Service Layer、Strategy、Observer、State、Pipeline、Adapter 等项目适用模式。
@@ -71,7 +71,7 @@
 
 - 子智能体可以并行分析 Controller、Service、Mapper、DDL、MQ 配置、admin-web 调用和 gateway 路由。
 - 不允许多个 worker 同时修改同一核心 Service、Mapper XML、权限规则或 DDL 脚本。
-- 消息服务全新或空业务库首次启动前，必须先在目标业务库手动执行 `../utils/src/main/resources/db/common-infra-schema.sql`，再执行或放行消息业务脚本；Seata AT 会在 `DataSource` 初始化时先检查 `undo_log`，不能依赖应用首次启动自动创建该表。
+- 消息服务全新或空业务库首次启动前，必须先在目标业务库手动执行 `../utils/src/main/resources/db/postgresql/common-infra-schema.sql`，再执行或放行消息业务脚本；Seata AT 会在 `DataSource` 初始化时先检查 `undo_log`，不能依赖应用首次启动自动创建该表。
 - 最终收件箱权限、发送权限、数据权限和测试结论必须由主智能体统一判断。
 
 ## 验证命令
