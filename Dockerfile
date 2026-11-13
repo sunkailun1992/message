@@ -1,4 +1,4 @@
-FROM registry.cn-hangzhou.aliyuncs.com/gongbaowang/jre-env:8u241
-COPY message-1.0.0.jar /app/
+FROM eclipse-temurin:21-jre
+COPY build/libs/message.jar /app/message.jar
 WORKDIR /app/
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["java", "-jar", "/app/message.jar"]
