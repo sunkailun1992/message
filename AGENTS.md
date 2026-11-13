@@ -50,7 +50,7 @@
 
 ## 项目边界
 
-- 个人公共库固定使用 `com:utils:1.6.6` 与 `com:rpc-api:1.0.9`；公司库保留 `com.kellen:utils` 与 `com.kellen:rpc-api`。双方共用同一阿里云私有 Maven 地址，沿用各自 group 坐标隔离，不改 Java package，也不迁移到另一仓库或 GitHub Packages。
+- 个人公共库固定使用 `com:utils:1.6.7` 与 `com:rpc-api:1.0.9`；公司库保留 `com.kellen:utils` 与 `com.kellen:rpc-api`。双方共用同一阿里云私有 Maven 地址，沿用各自 group 坐标隔离，不改 Java package，也不迁移到另一仓库或 GitHub Packages。
 
 - `message` 负责消息模板、消息记录、用户消息、接收侧查询、已读状态、发送记录和消息相关业务规则。
 - 新增消息渠道、模板类型、发送流程、收件箱状态、MQ 或第三方通知能力时，必须优先沿用 `docs/ai-coding/AI_DESIGN_PATTERN_GUIDE.md` 中的 Service Layer、Strategy、Observer、State、Pipeline、Adapter 等项目适用模式。
