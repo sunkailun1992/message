@@ -25,7 +25,7 @@ public class UserRpcTestController {
     /**
      * 用户中心 RPC。
      */
-    @DubboReference(check = false, timeout = 3000, parameters = {"traffic.canary.enabled", "true"})
+    @DubboReference(init = false, check = false, timeout = 3000, parameters = {"traffic.canary.enabled", "true"})
     private UserRpcService userRpcService;
 
     /**
