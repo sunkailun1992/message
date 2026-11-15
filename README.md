@@ -4,7 +4,7 @@
 
 当前项目只保留消息模块基础工程、统一异常处理、DDL 入口和 AI 编码规范；不包含 `user` 服务中的用户、租户、角色、权限资源等业务类。
 
-个人公共库固定为 `com:utils:1.6.8`、`com:rpc-api:1.0.9`。个人与美联共用同一阿里云私有 Maven 地址：个人沿用 `com` group，公司保留 `com.kellen` group；artifact 名仍为 `utils` / `rpc-api`，Java package 不随 Maven 坐标改变。公共库须先完成 Maven Local 验证并独立发布私库，消费者再按精确坐标拉取；已有同版制品不得覆盖。
+个人公共库固定为 `com:utils:1.6.9`、`com:rpc-api:1.0.9`。个人与美联共用同一阿里云私有 Maven 地址：个人沿用 `com` group，公司保留 `com.kellen` group；artifact 名仍为 `utils` / `rpc-api`，Java package 不随 Maven 坐标改变。公共库须先完成 Maven Local 验证并独立发布私库，消费者再按精确坐标拉取；已有同版制品不得覆盖。
 
 ## 启动入口
 
@@ -108,31 +108,24 @@ utils/src/main/java/com/kellen/config/rabbit/RabbitMqConfig.java
 
 ## DDL
 
-PostgreSQL 使用 `postgresql.*` / `postgresql-gray.*` 连接键与 `org.postgresql.Driver`，不回退到旧 MySQL 键。字符字段使用 ICU `fleet_general_ci` 保留常用大小写、重音不敏感的等值、唯一键和 `LIKE` 查询；这不等于完整复刻 MySQL Unicode 权重或尾空格规则，迁移前必须检查唯一键碰撞和尾空格。PG 18 的 nondeterministic collation 支持 `LIKE`，不要将现有查询改成不支持该排序规则的 `ILIKE` 或正则匹配。
+PostgreSQL 数据源用 dynamic-datasource 原生配置：`application.yml` 的 `spring.datasource.dynamic` 块放连接池与 Seata 参数，Nacos 的 `spring.datasource.dynamic.datasource.master/gray` 放地址与账号，驱动为 `org.postgresql.Driver`；JDBC URL 不带 `connectTimeout`、`socketTimeout`。字符字段使用 ICU `fleet_general_ci` 保留常用大小写、重音不敏感的等值、唯一键和 `LIKE` 查询；这不等于完整复刻 MySQL Unicode 权重或尾空格规则，迁移前必须检查唯一键碰撞和尾空格。PG 18 的 nondeterministic collation 支持 `LIKE`，不要将现有查询改成不支持该排序规则的 `ILIKE` 或正则匹配。
 
 真实 PG 结构回归通过受控进程环境提供 `FLEET_PG_TEST_URL`、`FLEET_PG_TEST_USERNAME`、`FLEET_PG_TEST_PASSWORD`；只允许 `fleet_pg_test_` 前缀的独立测试库，测试只创建并清理随机 schema。未提供时明确跳过，H2 回归不能代替 PostgreSQL 验收。凭据不得写进命令文本、仓库或测试报告。
 
-MyBatis-Plus DDL 入口在：
+表结构只由本服务的 Flyway 迁移维护：
 
 ```text
-src/main/java/com/kellen/bean/PostgresqlDdl.java
+src/main/resources/db/migration/V1__baseline.sql             现有结构快照，只在空库执行
+src/main/resources/db/migration/V2__drop_ddl_history.sql     删除旧 DDL 方式的执行记录表
+src/main/resources/db/migration/V3__rename_audit_columns.sql 审计列按实体基类改名
+src/main/resources/db/migration/V4__drop_unused_columns.sql  删除没人读写的 code、description、label、sorting，删前逐列核对为空
 ```
 
-当前消息模块 `PostgresqlDdl#getSqlFiles()` 声明公共基础设施脚本和消息业务脚本：
-
-```text
-db/postgresql/common-infra-schema.sql
-db/postgresql/message-schema.sql
-```
-
-全新或空业务库首次启动前，必须先在目标业务库手动执行同级 `../utils/src/main/resources/db/postgresql/common-infra-schema.sql`，先建 `ddl_history` 和 Seata AT `undo_log`。Seata AT 会在 `DataSource` 初始化时先检查 `undo_log`，不能依赖应用首次启动自动创建该表。
+表结构只由本服务 `src/main/resources/db/migration` 的 Flyway 迁移管理；已提交的迁移文件不修改，改结构只新增 `V<下一个>__<说明>.sql`；新库保持空库，由服务首次启动时的 Flyway 建表，不手工执行任何公共脚本。已有的库由 `baseline-on-migrate` 把版本 1 登记为基线、不执行 V1，再执行 V2 起的迁移。Seata AT 的 `undo_log` 在 `V1__baseline.sql` 里；数据源块的 `spring.datasource.dynamic.seata` 跟随 `seata.enabled`，启用 Seata 前库里须已完成迁移。
 
 后续新增消息业务表时：
 
-- SQL 放在 `src/main/resources/db/postgresql/*.sql`。
-- 先检查目标数据库 `ddl_history`。
-- 已执行或无法确认是否执行过的 SQL 文件不得回改。
-- 新增变更使用新的 SQL 文件，并追加到 `PostgresqlDdl#getSqlFiles()`。
+- 新增 `V<下一个>__<说明>.sql`，不改已提交的迁移文件。
 - 表字段、Entity、BO、Query、VO、ServiceQuery、ServiceResults 和测试同步补齐。
 
 ## 接口文档
@@ -232,7 +225,7 @@ bash scripts/check-secrets.sh
 
 ## 通用安全与架构同步
 
-公共安全依赖精确固定为 `com:utils:1.6.8`。Actuator 除 health 外要求运行时配置 `security.actuator.token` 并在 `actuatorReq` 请求头提交令牌；缺失或错误令牌一律拒绝。令牌由独立环境配置提供，不写入仓库。隔离的消费者回归测试只装配真实 MVC/Actuator 与安全链，不连接 Nacos、数据库、MQ 或远程服务；它不替代目标环境验收。
+公共安全依赖精确固定为 `com:utils:1.6.9`。Actuator 除 health 外要求运行时配置 `security.actuator.token` 并在 `actuatorReq` 请求头提交令牌；缺失或错误令牌一律拒绝。令牌由独立环境配置提供，不写入仓库。隔离的消费者回归测试只装配真实 MVC/Actuator 与安全链，不连接 Nacos、数据库、MQ 或远程服务；它不替代目标环境验收。
 
 版本由 `1.0.6` 升到 `1.0.7`。普通 `test` 排除既有 `manual-rpc` 联调标签；真实 Dubbo 联调需单独授权并显式运行。未引入用药提醒、短信供应商或新增业务 RPC。
 

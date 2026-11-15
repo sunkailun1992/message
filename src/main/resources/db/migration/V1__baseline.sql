@@ -1,36 +1,61 @@
--- PostgreSQL 18 业务结构。历史 MySQL 脚本保留，不在 PostgreSQL 启动时执行。
--- 先以对应业务角色执行 utils 的 db/postgresql/common-infra-schema.sql，再执行本文件。
--- ICU 主级比较保留大小写、重音不敏感的常用匹配；迁移前另查唯一键碰撞与尾空格。
--- MySQL ON UPDATE 时间由应用显式更新；不创建 Seata AT 不支持的数据库触发器。
-CREATE COLLATION IF NOT EXISTS public.fleet_general_ci (provider = icu, locale = 'und-u-ks-level1', deterministic = false);
+-- message 服务 V1 基线：现有表结构快照，只在空库上执行；
+-- 已有库由 Flyway baseline 登记为版本 1，不执行本文件。Seata AT 的 undo_log 定义沿用 Apache Seata v2.6.0 PostgreSQL 脚本。
 
+-- Seata AT 回滚日志表。
+CREATE TABLE IF NOT EXISTS undo_log (
+    id SERIAL NOT NULL,
+    branch_id BIGINT NOT NULL,
+    xid VARCHAR(128) NOT NULL,
+    context VARCHAR(128) NOT NULL,
+    rollback_info BYTEA NOT NULL,
+    log_status INT NOT NULL,
+    log_created TIMESTAMP(6) NOT NULL,
+    log_modified TIMESTAMP(6) NOT NULL,
+    CONSTRAINT pk_undo_log PRIMARY KEY (id),
+    CONSTRAINT ux_undo_log UNIQUE (xid, branch_id)
+);
+CREATE INDEX IF NOT EXISTS ix_log_created ON undo_log(log_created);
+COMMENT ON TABLE undo_log IS 'AT transaction mode undo table';
+COMMENT ON COLUMN undo_log.branch_id IS 'branch transaction id';
+COMMENT ON COLUMN undo_log.xid IS 'global transaction id';
+COMMENT ON COLUMN undo_log.context IS 'undo_log context,such as serialization';
+COMMENT ON COLUMN undo_log.rollback_info IS 'rollback info';
+COMMENT ON COLUMN undo_log.log_status IS '0:normal status,1:defense status';
+COMMENT ON COLUMN undo_log.log_created IS 'create datetime';
+COMMENT ON COLUMN undo_log.log_modified IS 'modify datetime';
+
+-- 业务表结构（PostgreSQL 18）。ICU 主级比较：大小写、重音不敏感的常用匹配。
+-- 更新时间由应用显式写入；不创建 Seata AT 不支持的数据库触发器。
+CREATE COLLATION IF NOT EXISTS fleet_general_ci (provider = icu, locale = 'und-u-ks-level1', deterministic = false);
+
+-- 用户消息表：建表、索引与列注释。
 CREATE TABLE IF NOT EXISTS message_user_message (
-    id varchar(64) COLLATE public.fleet_general_ci NOT NULL,
-    message_type varchar(32) COLLATE public.fleet_general_ci NOT NULL,
-    sender_user_id varchar(64) COLLATE public.fleet_general_ci,
-    sender_name varchar(255) COLLATE public.fleet_general_ci,
-    receiver_user_id varchar(64) COLLATE public.fleet_general_ci NOT NULL,
-    owner_user_id varchar(64) COLLATE public.fleet_general_ci,
-    dept_id varchar(64) COLLATE public.fleet_general_ci,
-    title varchar(255) COLLATE public.fleet_general_ci NOT NULL,
-    content text COLLATE public.fleet_general_ci NOT NULL,
-    send_state varchar(32) COLLATE public.fleet_general_ci NOT NULL DEFAULT 'SENT',
-    read_state varchar(32) COLLATE public.fleet_general_ci NOT NULL DEFAULT 'UNREAD',
+    id varchar(64) COLLATE fleet_general_ci NOT NULL,
+    message_type varchar(32) COLLATE fleet_general_ci NOT NULL,
+    sender_user_id varchar(64) COLLATE fleet_general_ci,
+    sender_name varchar(255) COLLATE fleet_general_ci,
+    receiver_user_id varchar(64) COLLATE fleet_general_ci NOT NULL,
+    owner_user_id varchar(64) COLLATE fleet_general_ci,
+    dept_id varchar(64) COLLATE fleet_general_ci,
+    title varchar(255) COLLATE fleet_general_ci NOT NULL,
+    content text COLLATE fleet_general_ci NOT NULL,
+    send_state varchar(32) COLLATE fleet_general_ci NOT NULL DEFAULT 'SENT',
+    read_state varchar(32) COLLATE fleet_general_ci NOT NULL DEFAULT 'UNREAD',
     send_date_time timestamp(0) without time zone DEFAULT CURRENT_TIMESTAMP,
     read_date_time timestamp(0) without time zone,
-    code varchar(255) COLLATE public.fleet_general_ci,
-    description varchar(255) COLLATE public.fleet_general_ci,
+    code varchar(255) COLLATE fleet_general_ci,
+    description varchar(255) COLLATE fleet_general_ci,
     create_date_time timestamp(0) without time zone DEFAULT CURRENT_TIMESTAMP,
-    create_name varchar(255) COLLATE public.fleet_general_ci,
+    create_name varchar(255) COLLATE fleet_general_ci,
     modify_date_time timestamp(0) without time zone DEFAULT CURRENT_TIMESTAMP,
-    modify_name varchar(255) COLLATE public.fleet_general_ci,
+    modify_name varchar(255) COLLATE fleet_general_ci,
     is_delete boolean DEFAULT false,
     type integer DEFAULT 0,
     state integer DEFAULT 1,
-    label varchar(255) COLLATE public.fleet_general_ci,
+    label varchar(255) COLLATE fleet_general_ci,
     sorting integer DEFAULT 0,
     version integer DEFAULT 1,
-    tenant_id varchar(64) COLLATE public.fleet_general_ci NOT NULL DEFAULT '1',
+    tenant_id varchar(64) COLLATE fleet_general_ci NOT NULL DEFAULT '1',
     PRIMARY KEY (id)
 );
 CREATE INDEX IF NOT EXISTS idx_message_user_message_owner_dept ON message_user_message (tenant_id, owner_user_id, dept_id);

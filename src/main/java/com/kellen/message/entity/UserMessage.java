@@ -1,7 +1,10 @@
 package com.kellen.message.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.kellen.entity.EntityBase;
+import com.baomidou.mybatisplus.annotation.Version;
+import com.kellen.entity.TenantEntityBase;
 import com.kellen.message.entity.enums.MessageReadStateEnum;
 import com.kellen.message.entity.enums.MessageSendStateEnum;
 import com.kellen.message.entity.enums.MessageTypeEnum;
@@ -23,7 +26,21 @@ import java.time.LocalDateTime;
 @Setter
 @TableName("message_user_message")
 @Schema(description = "用户消息实体")
-public class UserMessage extends EntityBase {
+public class UserMessage extends TenantEntityBase {
+
+    /**
+     * 主键，字符串雪花ID。
+     */
+    @Schema(description = "主键ID")
+    @TableId(type = IdType.ASSIGN_ID)
+    private String id;
+
+    /**
+     * MyBatis-Plus 乐观锁版本号。
+     */
+    @Version
+    @Schema(description = "版本号（乐观锁，更新时回传查询到的值）")
+    private Integer version;
 
     /**
      * 消息类型。

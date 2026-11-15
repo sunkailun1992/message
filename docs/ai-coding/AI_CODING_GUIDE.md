@@ -36,15 +36,11 @@ Git 流程以 `AGENTS.md` 与 `BRANCHING_SPEC.md` 为准：最新 main 起完整
 - 生成目标必须覆盖当前微服务所有需要人工输入 `code` 的表单，例如消息模板、消息渠道、消息场景等。
 - 生成结果只能包含小写字母、数字、下划线和冒号等 ASCII 可读字符；必须带时间和随机后缀，降低并发生成碰撞概率。
 
-## DDL 变更规则
+## 表结构变更规则
 
-- 修改 `src/main/resources/db/postgresql/*.sql` 前，先检查 `PostgresqlDdl#getSqlFiles()` 和数据库 `ddl_history` 的执行记录。
-- 全新或空业务库首次启动前，必须先在目标业务库手动执行 `../utils/src/main/resources/db/postgresql/common-infra-schema.sql`；Seata AT 会在 `DataSource` 初始化时先检查 `undo_log`，不能依赖 MyBatis-Plus DDL 首次启动自动创建该表。
-- 必须连接当前目标数据库查询 `ddl_history`；只有明确确认脚本未执行，才允许修改该脚本。
-- 已发布、已执行、可能已执行、无法确认执行状态的脚本禁止改原文件；原始建表和基础数据脚本一旦执行，后续变更必须新增独立 SQL。
-- 如果 `ddl_history` 已记录某个脚本，或无法连接数据库确认执行状态，后续表结构、默认数据、树状权限资源等变更必须新增独立 SQL 脚本，并按顺序追加到 `PostgresqlDdl#getSqlFiles()`。
-- 新增 SQL 必须具备重复执行安全性，优先使用 `CREATE TABLE IF NOT EXISTS`、`INSERT ... ON CONFLICT DO NOTHING` 和带租户/主键条件的确定性 `UPDATE`。
-- PostgreSQL 新增字段使用新的增量脚本；重复执行可使用 `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`，但仍须核对既有列类型、默认值和可空性，不能把存在列当成结构一致。
+- 表结构只由本服务 `src/main/resources/db/migration` 的 Flyway 迁移管理；已提交的迁移文件不修改，改结构只新增 `V<下一个>__<说明>.sql`；新库保持空库，由服务首次启动时的 Flyway 建表，不手工执行任何公共脚本。
+- Seata AT 的 `undo_log` 在 `V1__baseline.sql` 里；数据源块的 `spring.datasource.dynamic.seata` 跟随 `seata.enabled`，Seata 开启时数据源创建阶段（早于 Flyway）就会检查该表，所以启用 Seata 前库里须已完成迁移。
+- 补数据用 `INSERT ... ON CONFLICT DO NOTHING` 或带租户、主键条件的确定性 `UPDATE`；删列、删表前在迁移里核对为空，不为空就 `RAISE EXCEPTION`。
 - AI 生成新业务表时必须按 `PROJECT_CODING_SPEC.md` 的公共治理字段清单补齐 DDL，不得只写业务字段；同步检查 Entity、BO、VO、Query、ServiceQuery、索引、唯一约束和 SQL 注释。
 - 数据库列 `version` 只表示乐观锁；业务版本使用 `*_version` 命名，例如 `template_version`、`prompt_version`、`protocol_version`。
 - 新增需要数据权限控制的业务主表时，默认同时设计 `owner_user_id` 和 `dept_id` 字段，并同步补齐 Entity、BO、VO、Query、ServiceQuery 与 Nacos `security.data-permission.table-rules`。
