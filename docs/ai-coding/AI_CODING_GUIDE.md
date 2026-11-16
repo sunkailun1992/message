@@ -39,7 +39,7 @@ Git 流程以 `AGENTS.md` 与 `BRANCHING_SPEC.md` 为准：最新 main 起完整
 ## 表结构变更规则
 
 - 表结构只由本服务 `src/main/resources/db/migration` 的 Flyway 迁移管理；已提交的迁移文件不修改，改结构只新增 `V<下一个>__<说明>.sql`；新库保持空库，由服务首次启动时的 Flyway 建表，不手工执行任何公共脚本。
-- Seata AT 的 `undo_log` 在 `V1__baseline.sql` 里；数据源块的 `spring.datasource.dynamic.seata` 跟随 `seata.enabled`，Seata 开启时数据源创建阶段（早于 Flyway）就会检查该表，所以启用 Seata 前库里须已完成迁移。
+- Seata AT 的 `undo_log` 在 `V1__baseline.sql` 里；数据源块固定 `spring.datasource.dynamic.seata: true`，不设总开关；建池时 Seata AT 代理就检查该表，utils 在创建任何 Bean 之前先执行 Flyway 迁移，新空库首次启动即建出该表。
 - 补数据用 `INSERT ... ON CONFLICT DO NOTHING` 或带租户、主键条件的确定性 `UPDATE`；删列、删表前在迁移里核对为空，不为空就 `RAISE EXCEPTION`。
 - AI 生成新业务表时必须按 `PROJECT_CODING_SPEC.md` 的公共治理字段清单补齐 DDL，不得只写业务字段；同步检查 Entity、BO、VO、Query、ServiceQuery、索引、唯一约束和 SQL 注释。
 - 数据库列 `version` 只表示乐观锁；业务版本使用 `*_version` 命名，例如 `template_version`、`prompt_version`、`protocol_version`。

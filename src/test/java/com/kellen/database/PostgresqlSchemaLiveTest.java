@@ -1,11 +1,17 @@
 package com.kellen.database;
 
-import org.flywaydb.core.api.FlywayException;
+import com.baomidou.mybatisplus.core.MybatisConfiguration;
+import com.baomidou.mybatisplus.core.metadata.TableInfo;
+import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
+import com.kellen.message.entity.UserMessage;
+import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** 服务自己的 Flyway 迁移在独占 schema 上实际执行，并回归布尔、时间与大小写不敏感比较；不连接真实业务库。 */
 @EnabledIfEnvironmentVariable(named = "FLEET_PG_TEST_URL", matches = ".+")
@@ -19,9 +25,12 @@ class PostgresqlSchemaLiveTest extends PostgresqlSchemaFixture {
                 + "' AND table_type = 'BASE TABLE' AND table_name NOT IN ('undo_log', 'flyway_schema_history') ORDER BY 1"))
                 .containsExactly("message_user_message");
         assertThat(columns("message_user_message"))
-                .contains("id", "create_time", "update_time", "creator", "updater", "is_deleted", "tenant_id", "version")
-                .doesNotContain("create_date_time", "modify_date_time", "create_name", "modify_name", "is_delete",
-                        "code", "description", "label", "sorting");
+                .contains("id", "code", "description", "create_time", "creator", "update_time", "updater", "is_deleted",
+                        "label", "sorting", "version", "tenant_id", "create_dept")
+                .doesNotContain("create_date_time", "modify_date_time", "create_name", "modify_name", "is_delete");
+        assertThat(number("SELECT count(*) FROM information_schema.columns WHERE table_schema = '" + schema
+                + "' AND column_name = 'create_dept' AND data_type = 'character varying' AND character_maximum_length = 64"
+                + " AND is_nullable = 'YES'")).isEqualTo(1);
         assertThat(number("SELECT count(*) FROM information_schema.tables WHERE table_schema = '" + schema
                 + "' AND table_name = 'ddl_history'")).isZero();
         assertThat(number("SELECT count(*) FROM information_schema.tables WHERE table_schema = '" + schema
@@ -29,12 +38,26 @@ class PostgresqlSchemaLiveTest extends PostgresqlSchemaFixture {
     }
 
     @Test
-    void dropUnusedColumnsRefusesWhenAColumnStillHasData() throws Exception {
+    void createDeptIsAddedWithoutDroppingAnyColumnOrRow() throws Exception {
         migrate("3");
-        execute("INSERT INTO message_user_message(id, message_type, receiver_user_id, title, content, tenant_id, label) VALUES ('fixture-labelled', 'SYSTEM', 'fixture-user', 'synthetic', 'synthetic', 'fixture-tenant', 'kept')");
-        assertThatThrownBy(() -> migrate(null)).isInstanceOf(FlywayException.class);
-        assertThat(appliedVersions()).containsExactly("1", "2", "3");
-        assertThat(columns("message_user_message")).contains("label", "code", "description", "sorting");
+        execute("INSERT INTO message_user_message(id, message_type, receiver_user_id, title, content, tenant_id, label, sorting) VALUES ('fixture-kept', 'SYSTEM', 'fixture-user', 'synthetic', 'synthetic', 'fixture-tenant', 'kept', 7)");
+        migrate(null);
+        assertThat(appliedVersions()).containsExactly("1", "2", "3", "4");
+        assertThat(number("SELECT count(*) FROM message_user_message WHERE id = 'fixture-kept' AND label = 'kept' AND sorting = 7"
+                + " AND create_dept IS NULL")).isEqualTo(1);
+        assertThat(strings("SELECT col_description(('" + schema + ".message_user_message')::regclass, ordinal_position::int)"
+                + " FROM information_schema.columns WHERE table_schema = '" + schema
+                + "' AND table_name = 'message_user_message' AND column_name = 'create_dept'")).containsExactly("创建部门ID");
+    }
+
+    @Test
+    void everyEntityFieldMapsToAColumnOfItsTable() throws Exception {
+        migrate(null);
+        TableInfo info = TableInfoHelper.initTableInfo(
+                new MapperBuilderAssistant(new MybatisConfiguration(), "entity-columns"), UserMessage.class);
+        List<String> mapped = new ArrayList<>(List.of(info.getKeyColumn()));
+        info.getFieldList().forEach(field -> mapped.add(field.getColumn()));
+        assertThat(columns(info.getTableName())).containsAll(mapped);
     }
 
     @Test
