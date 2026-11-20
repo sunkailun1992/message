@@ -242,3 +242,5 @@ Admin/Zipkin 模板与三 profile 的 imports 已退役。服务 JVM 的可选 O
 `1.2.6` 将公共依赖升到 `com:utils:1.6.7`：修复 Dubbo 上下文透传过滤器拿不到 Spring 绑定的灰度与租户配置（提供方误拒全部灰度授权、灰度实例不带授权也放行、自定义租户头名不生效），本服务代码不变。
 
 `1.3.0` 消费 user 发出的“账号已创建”事件，给新账号写欢迎站内信；新增 V6 迁移（`source_event_id` 与部分唯一索引）按事件去重；依赖升级为 `com:utils:1.7.2`（RocketMQ 消息模块）与 `com:rpc-api:1.1.0`（事件契约），消息队列相关描述全部改为 RocketMQ。
+
+`1.3.1` 在 `build.gradle` 照 Nacos、Seata 的写法把 `rocketmq-client`、`rocketmq-remoting`、`rocketmq-common` 锁到 `5.5.1`（与 NAS 上 5.5 服务端同一版本线）。Spring Cloud Alibaba 的 BOM 会把客户端管成 5.3.1，而 utils 排除了只发到 5.3.2 的 rocketmq-acl，5.3.1 里没有 ACL 签名类，监听容器按账号创建签名钩子时失败，1.3.0 因此启动失败。`RocketMqClientCompatibilityTest` 锁住这一点。

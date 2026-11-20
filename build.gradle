@@ -12,7 +12,7 @@ plugins {
  * 项目基础信息
  */
 group = 'com'
-version = '1.3.0'
+version = '1.3.1'
 description = 'message'
 
 /**
@@ -39,6 +39,8 @@ ext {
     nacosClientVersion = '3.3.0'
     // Seata Client 版本；当前已发布 starter 最新为 2.6.0，可注册到 Seata Server 2.7.0。
     seataVersion = '2.6.0'
+    // RocketMQ 客户端版本，与 NAS 上 5.5 服务端同一版本线；Spring Cloud Alibaba BOM 管理为 5.3.1，5.3.1 不含 ACL 签名类，配了账号就启动失败。
+    rocketmqClientVersion = '5.5.1'
     // 公共 utils 包版本，必须与本地或远程 Maven 制品保持一致。
     utilsVersion = '1.7.2'
     // 公共 RPC 契约包版本，必须与 provider/consumer 使用的契约保持一致。
@@ -127,6 +129,11 @@ configurations.configureEach {
         if (details.requested.group == 'org.apache.seata') {
             details.useVersion seataVersion
             details.because 'Use the latest published Apache Seata starter; it is compatible with the 2.7.0 server line used by the shared microservice environment.'
+        }
+        if (details.requested.group == 'org.apache.rocketmq'
+                && details.requested.name in ['rocketmq-client', 'rocketmq-remoting', 'rocketmq-common']) {
+            details.useVersion rocketmqClientVersion
+            details.because 'RocketMQ client modules follow the 5.5 server line; 5.5.1 ships the ACL signing hook that utils relies on after excluding rocketmq-acl.'
         }
     }
 }
