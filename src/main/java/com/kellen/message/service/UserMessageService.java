@@ -6,6 +6,7 @@ import com.kellen.message.entity.bo.UserMessageBO;
 import com.kellen.message.entity.enums.MessageTypeEnum;
 import com.kellen.message.entity.query.UserMessageQuery;
 import com.kellen.message.entity.vo.UserMessageVO;
+import com.kellen.rpc.user.event.UserAccountCreatedEvent;
 
 import java.util.List;
 
@@ -41,6 +42,16 @@ public interface UserMessageService {
      * @return 新增消息数量
      */
     Integer send(UserMessageBO bo);
+
+    /**
+     * 给新账号发欢迎站内信（系统提醒），由“账号已创建”事件触发。
+     *
+     * <p>按事件 ID 与接收人去重：同一事件重复投递时不再写入，返回 false。消息归属取消费钩子还原的操作人。</p>
+     *
+     * @param event 账号已创建事件
+     * @return true 表示写入了一条站内信；false 表示该事件已处理过
+     */
+    boolean sendWelcomeNotice(UserAccountCreatedEvent event);
 
     /**
      * 分页查询当前用户接收的消息。

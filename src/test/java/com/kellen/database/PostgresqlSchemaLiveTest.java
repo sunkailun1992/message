@@ -36,17 +36,23 @@ class PostgresqlSchemaLiveTest extends PostgresqlSchemaFixture {
     @Test
     void migratesEmptySchemaToLatestVersion() throws Exception {
         assertThat(migrate(null).success).isTrue();
-        assertThat(appliedVersions()).containsExactly("1", "2", "3", "4", "5");
+        assertThat(appliedVersions()).containsExactly("1", "2", "3", "4", "5", "6");
         assertThat(strings("SELECT table_name FROM information_schema.tables WHERE table_schema = '" + schema
                 + "' AND table_type = 'BASE TABLE' AND table_name NOT IN ('undo_log', 'flyway_schema_history') ORDER BY 1"))
                 .containsExactly("message_user_message");
         assertThat(columns("message_user_message"))
                 .contains("id", "code", "description", "create_time", "create_by", "update_time", "update_by", "is_deleted",
-                        "label", "sorting", "version", "tenant_id", "create_dept")
+                        "label", "sorting", "version", "tenant_id", "create_dept", "source_event_id")
                 .doesNotContain("create_date_time", "modify_date_time", "create_name", "modify_name", "is_delete", "creator", "updater");
         assertThat(number("SELECT count(*) FROM information_schema.columns WHERE table_schema = '" + schema
                 + "' AND column_name = 'create_dept' AND data_type = 'character varying' AND character_maximum_length = 64"
                 + " AND is_nullable = 'YES'")).isEqualTo(1);
+        assertThat(number("SELECT count(*) FROM information_schema.columns WHERE table_schema = '" + schema
+                + "' AND table_name = 'message_user_message' AND column_name = 'source_event_id' AND data_type = 'character varying'"
+                + " AND character_maximum_length = 64 AND is_nullable = 'YES'")).isEqualTo(1);
+        assertThat(number("SELECT count(*) FROM pg_indexes WHERE schemaname = '" + schema
+                + "' AND indexname = 'uk_message_user_message_source_event' AND indexdef LIKE 'CREATE UNIQUE INDEX %'"
+                + " AND indexdef LIKE '%(source_event_id, receiver_user_id) WHERE (source_event_id IS NOT NULL)'")).isEqualTo(1);
         assertThat(number("SELECT count(*) FROM information_schema.tables WHERE table_schema = '" + schema
                 + "' AND table_name = 'ddl_history'")).isZero();
         assertThat(number("SELECT count(*) FROM information_schema.tables WHERE table_schema = '" + schema
@@ -58,7 +64,7 @@ class PostgresqlSchemaLiveTest extends PostgresqlSchemaFixture {
         migrate("3");
         execute("INSERT INTO message_user_message(id, message_type, receiver_user_id, title, content, tenant_id, label, sorting) VALUES ('fixture-kept', 'SYSTEM', 'fixture-user', 'synthetic', 'synthetic', 'fixture-tenant', 'kept', 7)");
         migrate(null);
-        assertThat(appliedVersions()).containsExactly("1", "2", "3", "4", "5");
+        assertThat(appliedVersions()).containsExactly("1", "2", "3", "4", "5", "6");
         assertThat(number("SELECT count(*) FROM message_user_message WHERE id = 'fixture-kept' AND label = 'kept' AND sorting = 7"
                 + " AND create_dept IS NULL")).isEqualTo(1);
         assertThat(strings("SELECT col_description(('" + schema + ".message_user_message')::regclass, ordinal_position::int)"

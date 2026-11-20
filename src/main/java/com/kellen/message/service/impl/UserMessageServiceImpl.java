@@ -14,11 +14,13 @@ import com.kellen.message.mapper.UserMessageMapper;
 import com.kellen.message.service.UserMessageService;
 import com.kellen.message.service.query.UserMessageServiceQuery;
 import com.kellen.message.service.results.UserMessageServiceResults;
+import com.kellen.rpc.user.event.UserAccountCreatedEvent;
 import com.kellen.security.SecurityUser;
 import com.kellen.security.UserContextHolder;
 import com.kellen.utils.context.TenantContextHolder;
 import com.kellen.utils.convert.GeneralConvertor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -126,6 +128,38 @@ public class UserMessageServiceImpl implements UserMessageService {
             return receiverUserIds.size(); // 返回实际发送用户数量。
         } finally {
             TenantContextHolder.clear(); // 清理租户上下文，避免线程复用串租户。
+        }
+    }
+
+    /**
+     * 给新账号发欢迎站内信。
+     *
+     * <p>不加事务：只有一条插入，唯一冲突时 PostgreSQL 会让所在事务失效，放在事务里就没法把重复投递当作已处理。</p>
+     *
+     * @param event 账号已创建事件
+     * @return true 表示写入了一条站内信；false 表示该事件已处理过
+     */
+    @Override
+    public boolean sendWelcomeNotice(UserAccountCreatedEvent event) {
+        SecurityUser operator = UserContextHolder.get(); // 消费钩子按消息还原的操作人，即建账号的管理员。
+        UserMessage message = new UserMessage();
+        message.setMessageType(MessageTypeEnum.SYSTEM_NOTICE); // 欢迎提醒是系统提醒。
+        message.setSenderName("system"); // 系统发出，没有发送人用户ID。
+        message.setReceiverUserId(event.getUserId()); // 接收人是新账号。
+        message.setOwnerUserId(operator == null ? null : operator.getUserId()); // 与人工发送一致，归属取操作人，便于发送管理按本人过滤。
+        message.setDeptId(operator == null ? null : operator.getDeptId()); // 归属部门取操作人的部门。
+        message.setTitle("欢迎使用");
+        message.setContent("你好，" + StringUtils.defaultIfBlank(event.getNickname(), event.getUsername()) + "，你的账号已创建。"); // 昵称为空时称呼用用户名。
+        message.setSendState(MessageSendStateEnum.SENT); // 入库即视为已发送。
+        message.setReadState(MessageReadStateEnum.UNREAD); // 新消息默认未读。
+        message.setSendDateTime(LocalDateTime.now());
+        message.setTenantId(event.getTenantId()); // 写入新账号所在租户。
+        message.setSourceEventId(event.getEventId()); // 记下来源事件，供唯一索引去重。
+        try {
+            userMessageMapper.insert(message);
+            return true;
+        } catch (DuplicateKeyException duplicate) {
+            return false; // 同一事件已写过，重复投递当作已处理。
         }
     }
 

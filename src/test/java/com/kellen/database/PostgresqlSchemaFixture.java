@@ -19,13 +19,13 @@ import java.util.Properties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** 仅允许独立 PostgreSQL 18 测试库；所有业务 fixture 位于每测试独占 schema。 */
-abstract class PostgresqlSchemaFixture {
+/** 仅允许独立 PostgreSQL 18 测试库；所有业务 fixture 位于每测试独占 schema。其他包的真库测试可继承它。 */
+public abstract class PostgresqlSchemaFixture {
     protected Connection connection;
     protected String schema;
 
     @BeforeEach
-    void createIsolatedSchema() throws Exception {
+    protected void createIsolatedSchema() throws Exception {
         Properties properties = new Properties();
         properties.setProperty("user", System.getenv("FLEET_PG_TEST_USERNAME"));
         properties.setProperty("password", System.getenv("FLEET_PG_TEST_PASSWORD"));
@@ -44,7 +44,7 @@ abstract class PostgresqlSchemaFixture {
     }
 
     @AfterEach
-    void removeOnlyOwnSchema() throws Exception {
+    protected void removeOnlyOwnSchema() throws Exception {
         if (connection != null) {
             try {
                 if (schema != null) {

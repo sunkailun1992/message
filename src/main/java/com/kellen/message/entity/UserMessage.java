@@ -96,4 +96,10 @@ public class UserMessage extends TenantEntityBase {
      */
     @Schema(description = "读取时间")
     private LocalDateTime readDateTime;
+
+    /**
+     * 来源事件ID；由消息事件生成的消息才有，同一事件对同一接收人只写一行。
+     */
+    @Schema(description = "来源事件ID")
+    private String sourceEventId;
 }

@@ -23,7 +23,7 @@
 
 - 项目名称：`message`
 - 项目类型：消息服务后端
-- 技术栈：Java 21、Spring Boot、Gradle、MyBatis-Plus、RabbitMQ、Nacos、Dubbo、`com:utils`、`com:rpc-api`
+- 技术栈：Java 21、Spring Boot、Gradle、MyBatis-Plus、RocketMQ、Nacos、Dubbo、`com:utils`、`com:rpc-api`
 - 同级依赖：`../rpc-api` 提供跨服务 RPC 接口和 DTO 契约；`../utils` 提供公共响应、认证上下文、租户、多数据源和基础工具；`../gateway` 负责路由；`../admin-web` 负责后台页面
 - 核心风险：消息接收人可见性、发送人数据权限、租户隔离、消息重复推送、模板内容 XSS、MQ 和外部通道失败处理
 
@@ -50,7 +50,7 @@
 
 ## 项目边界
 
-- 个人公共库固定使用 `com:utils:1.7.0` 与 `com:rpc-api:1.0.9`；公司库保留 `com.kellen:utils` 与 `com.kellen:rpc-api`。双方共用同一阿里云私有 Maven 地址，沿用各自 group 坐标隔离，不改 Java package，也不迁移到另一仓库或 GitHub Packages。
+- 个人公共库固定使用 `com:utils:1.7.2` 与 `com:rpc-api:1.1.0`；公司库保留 `com.kellen:utils` 与 `com.kellen:rpc-api`。双方共用同一阿里云私有 Maven 地址，沿用各自 group 坐标隔离，不改 Java package，也不迁移到另一仓库或 GitHub Packages。
 
 - `message` 负责消息模板、消息记录、用户消息、接收侧查询、已读状态、发送记录和消息相关业务规则。
 - 新增消息渠道、模板类型、发送流程、收件箱状态、MQ 或第三方通知能力时，必须优先沿用 `docs/ai-coding/AI_DESIGN_PATTERN_GUIDE.md` 中的 Service Layer、Strategy、Observer、State、Pipeline、Adapter 等项目适用模式。
@@ -93,6 +93,6 @@ bash scripts/check-secrets.sh
 
 - 禁止信任前端传入的当前用户、租户、接收人归属和权限字段。
 - 禁止把消息模板、富文本、回调内容直接作为 HTML 输出或日志全文输出。
-- 禁止写死测试用户、测试租户、消息接收人、RabbitMQ 地址、Nacos 地址或本机路径。
-- 禁止 AI 触碰真实密钥/凭证、RabbitMQ/数据库密码（疑似密钥只能告警，由项目负责人处理）；配置中心结构性调整（dataId 拆分/合并、import 顺序、`${}` 引用、Nacos/RabbitMQ 接入地址、namespace/group）允许 AI 自主完成，但必须保值不改值，不得擅自变更生产业务配置的实际取值。
+- 禁止写死测试用户、测试租户、消息接收人、RocketMQ 地址、Nacos 地址或本机路径。
+- 禁止 AI 触碰真实密钥/凭证、RocketMQ/数据库密码（疑似密钥只能告警，由项目负责人处理）；配置中心结构性调整（dataId 拆分/合并、import 顺序、`${}` 引用、Nacos/RocketMQ 接入地址、namespace/group）允许 AI 自主完成，但必须保值不改值，不得擅自变更生产业务配置的实际取值。
 - 禁止在当前服务复制 `utils` 公共工具源码或 `rpc-api` 契约源码；业务 RPC 契约缺失时回到真实 `../rpc-api` 实现，公共能力缺失时先评估是否应回到 `../utils` 实现。

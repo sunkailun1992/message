@@ -4,7 +4,7 @@
 
 当前项目只保留消息模块基础工程、统一异常处理、DDL 入口和 AI 编码规范；不包含 `user` 服务中的用户、租户、角色、权限资源等业务类。
 
-个人公共库固定为 `com:utils:1.7.0`、`com:rpc-api:1.0.9`。个人与美联共用同一阿里云私有 Maven 地址：个人沿用 `com` group，公司保留 `com.kellen` group；artifact 名仍为 `utils` / `rpc-api`，Java package 不随 Maven 坐标改变。公共库须先完成 Maven Local 验证并独立发布私库，消费者再按精确坐标拉取；已有同版制品不得覆盖。
+个人公共库固定为 `com:utils:1.7.2`、`com:rpc-api:1.1.0`。个人与美联共用同一阿里云私有 Maven 地址：个人沿用 `com` group，公司保留 `com.kellen` group；artifact 名仍为 `utils` / `rpc-api`，Java package 不随 Maven 坐标改变。公共库须先完成 Maven Local 验证并独立发布私库，消费者再按精确坐标拉取；已有同版制品不得覆盖。
 
 ## 启动入口
 
@@ -31,7 +31,7 @@
 - 系统通知
 - 消息模板
 - 消息发送记录
-- RabbitMQ 消息生产与消费
+- RocketMQ 消息消费（账号已创建后给新账号发欢迎站内信）
 - 定时或异步补偿消息
 - 与短信、邮件、微信、App 推送等第三方通知能力的业务编排
 
@@ -39,7 +39,7 @@
 
 ## 基础设施地址
 
-除 `application.yml` 中连接 Nacos 自身的启动入口外，PostgreSQL、Redis、RabbitMQ、Seata、Elasticsearch、Kibana、Zipkin 等基础设施地址统一放在 Nacos `reuse-configuration.yaml`。
+除 `application.yml` 中连接 Nacos 自身的启动入口外，PostgreSQL、Redis、RocketMQ、Seata、Elasticsearch、Kibana、Zipkin 等基础设施地址统一放在 Nacos `reuse-configuration.yaml`。
 
 蒲公英、Tailscale、节点小宝等组网地址变化时，优先只修改公共配置中的基础设施变量，例如：
 
@@ -49,7 +49,6 @@ custom:
   infra-nacos-addr: ${custom.infra-host}:8848
   infra-postgresql-addr: ${custom.infra-host}:<POSTGRESQL_PORT>
   infra-redis-addr: ${custom.infra-host}:6379
-  infra-rabbitmq-addr: ${custom.infra-host}:5672
   infra-seata-addr: ${custom.infra-host}:8091
   infra-elasticsearch-addr: ${custom.infra-host}:9200
   infra-elasticsearch-uri: http://${custom.infra-host}:9200
@@ -88,23 +87,14 @@ dubbo.yaml
 local-canary.yaml
 ```
 
-## RabbitMQ
+## RocketMQ
 
-RabbitMQ 公共增强配置统一放在 `utils`：
+消息收发用 `utils` 的消息模块（rocketmq-spring；配置、命名、泳道与禁止事项见 utils 的 `docs/ai-coding/MQ_SPEC.md`），本服务不复制公共 MQ 配置。当前只消费一个事件：
 
-```text
-utils/src/main/java/com/kellen/config/rabbit/RabbitMqConfig.java
-```
-
-当前配置负责：
-
-- 复用 Spring Boot 标准 `spring.rabbitmq.*` 自动配置。
-- 注册 RabbitMQ JSON 消息转换器。
-- 发送消息时透传当前动态数据源、`traceId` 和租户上下文。
-- 消费消息时恢复动态数据源、`traceId` 和租户上下文。
-- 消费完成后清理线程上下文，避免消费线程复用串数据。
-
-业务服务只声明自己的 exchange、queue、binding 和 listener；不得在业务服务复制公共 MQ 配置。
+- `UserAccountCreatedConsumer` 订阅 `fleet.mq.topic.user-account-created`，消费组 `fleet.mq.group.user-account-created`；这两个键、`rocketmq.name-server` 与消费账号都在 Nacos `message-spring.yaml`。事件 `com.kellen.rpc.user.event.UserAccountCreatedEvent` 由 user 在新建账号的事务提交后发出。
+- 收到后给新账号写一条欢迎站内信：类型 `SYSTEM_NOTICE`，发件人 `system`、无发件人用户 ID，标题“欢迎使用”，正文“你好，<昵称，为空时用用户名>，你的账号已创建。”，已发送、未读；租户取事件里的租户，归属人与归属部门取消费钩子还原的操作人（建账号的管理员），与人工发送一致。
+- 去重：`message_user_message.source_event_id`（V6 迁移）记下事件 ID，部分唯一索引 `(source_event_id, receiver_user_id)` 保证同一事件对同一接收人只写一行，重复投递直接跳过。写库出错抛出时 RocketMQ 重试，3 次后进死信 `%DLQ%<消费组>`。
+- 消费前 utils 的消费钩子按消息属性还原租户、操作人与数据源标记，消费后恢复原值；非稳定实例的消费组自动加泳道后缀，只收本泳道的消息。
 
 ## DDL
 
@@ -250,3 +240,5 @@ Admin/Zipkin 模板与三 profile 的 imports 已退役。服务 JVM 的可选 O
 `1.2.4` 为第1阶段底座升级：Java 21、Gradle 9.9.1、Spring Boot 4.0.9、Spring Cloud 2025.1.4、Nacos 客户端 3.3.0，公共依赖 `com:utils:1.6.6`（传递 `com:fleet-observability:0.1.4`）与 `com:rpc-api:1.0.9`，OTel BOM 1.67.0 对齐 Java agent 2.33.1。业务接口与配置不变；运行环境须为 Java 21。
 
 `1.2.6` 将公共依赖升到 `com:utils:1.6.7`：修复 Dubbo 上下文透传过滤器拿不到 Spring 绑定的灰度与租户配置（提供方误拒全部灰度授权、灰度实例不带授权也放行、自定义租户头名不生效），本服务代码不变。
+
+`1.3.0` 消费 user 发出的“账号已创建”事件，给新账号写欢迎站内信；新增 V6 迁移（`source_event_id` 与部分唯一索引）按事件去重；依赖升级为 `com:utils:1.7.2`（RocketMQ 消息模块）与 `com:rpc-api:1.1.0`（事件契约），消息队列相关描述全部改为 RocketMQ。
