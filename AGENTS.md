@@ -50,12 +50,13 @@
 
 ## 项目边界
 
-- 个人公共库固定使用 `com:utils:2.0.6` 与 `com:rpc-api:2.0.0`；公司库保留 `com.kellen:utils` 与 `com.kellen:rpc-api`。双方共用同一阿里云私有 Maven 地址，沿用各自 group 坐标隔离，不改 Java package，也不迁移到另一仓库或 GitHub Packages。
+- 个人公共库固定使用 `com:utils:2.0.7` 与 `com:rpc-api:2.0.0`；公司库保留 `com.kellen:utils` 与 `com.kellen:rpc-api`。双方共用同一阿里云私有 Maven 地址，沿用各自 group 坐标隔离，不改 Java package，也不迁移到另一仓库或 GitHub Packages。
 
 - `message` 负责消息模板、消息记录、用户消息、接收侧查询、已读状态、发送记录和消息相关业务规则。
 - 新增消息渠道、模板类型、发送流程、收件箱状态、MQ 或第三方通知能力时，必须优先沿用 `docs/ai-coding/AI_DESIGN_PATTERN_GUIDE.md` 中的 Service Layer、Strategy、Observer、State、Pipeline、Adapter 等项目适用模式。
 - 新增业务表必须按 `docs/ai-coding/PROJECT_CODING_SPEC.md` 补齐公共治理字段；`version` 只做乐观锁，业务版本使用 `*_version` 命名。
 - 当前用户收件箱接口必须从认证上下文取当前用户，不信任前端传入的接收人 ID。
+- 接口带的 `tenantId` 必须先过 utils `TenantBoundary.require`：只能是调用方的活动租户，平台超级管理员除外；不得用请求里的租户直接设置 `TenantContextHolder`。
 - 发送侧所有权和接收侧收件箱是不同权限场景，不得用发送人数据权限隐藏接收人的消息。
 - 公共响应、认证上下文、多租户、错误码和工具能力优先复用 `../utils`。
 - 跨服务 Dubbo RPC 调用优先复用 `../rpc-api` 中的接口和 DTO，不在本服务复制契约。

@@ -1,5 +1,6 @@
 package com.kellen.message.controller;
 
+import com.kellen.security.TenantBoundary;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kellen.message.entity.UserMessage;
 import com.kellen.message.entity.bo.UserMessageBO;
@@ -62,6 +63,8 @@ public class UserMessageController {
     @PreAuthorize("hasAnyAuthority('user:auth:manage','message:user-message:list')")
     @Operation(summary = "查询用户消息选项", description = "按查询条件返回当前租户下的用户消息轻量列表")
     public ApiResponse<List<UserMessageVO>> list(@ParameterObject @Validated UserMessageQuery query) {
+        // 请求点名的租户只能是自己的活动租户（平台超级管理员除外），越界在进入业务服务之前回 403。
+        TenantBoundary.require(query.getTenantId());
         return ApiResponse.success(userMessageService.list(query)); // 查询指定租户的用户消息轻量列表。
     }
 
@@ -76,6 +79,8 @@ public class UserMessageController {
     @PreAuthorize("hasAnyAuthority('user:auth:manage','message:user-message:list')")
     @Operation(summary = "分页查询用户消息", description = "按查询条件分页返回当前租户下的用户消息数据")
     public ApiResponse<Page<UserMessageVO>> page(@ParameterObject @Validated(UserMessageQuery.Select.class) UserMessageQuery query) {
+        // 请求点名的租户只能是自己的活动租户（平台超级管理员除外），越界在进入业务服务之前回 403。
+        TenantBoundary.require(query.getTenantId());
         Page<UserMessage> page = new Page<>(query.getCurrent(), query.getSize()); // 创建 MyBatis-Plus 分页对象。
         return ApiResponse.success(userMessageService.page(page, query)); // 查询用户消息分页并返回统一响应。
     }
@@ -89,6 +94,8 @@ public class UserMessageController {
     @GetMapping(value = "/current", params = {"current", "size"})
     @Operation(summary = "分页查询当前用户消息", description = "分页返回当前认证用户在当前租户接收的系统提醒和正常消息")
     public ApiResponse<Page<UserMessageVO>> currentPage(@ParameterObject @Validated(UserMessageQuery.Select.class) UserMessageQuery query) {
+        // 请求点名的租户只能是自己的活动租户（平台超级管理员除外），越界在进入业务服务之前回 403。
+        TenantBoundary.require(query.getTenantId());
         Page<UserMessage> page = new Page<>(query.getCurrent(), query.getSize()); // 创建 MyBatis-Plus 分页对象。
         return ApiResponse.success(userMessageService.currentPage(page, query)); // 查询当前用户消息分页并返回统一响应。
     }
@@ -103,6 +110,8 @@ public class UserMessageController {
     @GetMapping("/current/unread-count")
     @Operation(summary = "查询当前用户未读消息数量", description = "返回当前认证用户在当前租户下的未读消息数量")
     public ApiResponse<Long> currentUnreadCount(@RequestParam String tenantId, @RequestParam(required = false) MessageTypeEnum messageType) {
+        // 请求点名的租户只能是自己的活动租户（平台超级管理员除外），越界在进入业务服务之前回 403。
+        TenantBoundary.require(tenantId);
         return ApiResponse.success(userMessageService.currentUnreadCount(tenantId, messageType)); // 查询当前用户未读消息数量。
     }
 
@@ -116,6 +125,8 @@ public class UserMessageController {
     @PatchMapping("/{id}/read")
     @Operation(summary = "标记当前用户消息已读", description = "仅允许当前认证用户标记自己接收的消息为已读")
     public ApiResponse<Boolean> readCurrentMessage(@PathVariable String id, @RequestParam String tenantId) {
+        // 请求点名的租户只能是自己的活动租户（平台超级管理员除外），越界在进入业务服务之前回 403。
+        TenantBoundary.require(tenantId);
         return ApiResponse.success(userMessageService.readCurrentMessage(tenantId, id)); // 标记当前用户消息已读。
     }
 
@@ -130,6 +141,8 @@ public class UserMessageController {
     @PreAuthorize("hasAnyAuthority('user:auth:manage','message:user-message:send')")
     @Operation(summary = "发送用户消息", description = "给指定用户发送系统提醒或正常消息，并返回实际发送数量")
     public ApiResponse<Integer> send(@Validated @RequestBody UserMessageBO bo) {
+        // 请求点名的租户只能是自己的活动租户（平台超级管理员除外），越界在进入业务服务之前回 403。
+        TenantBoundary.require(bo.getTenantId());
         return ApiResponse.success(userMessageService.send(bo)); // 发送用户消息并返回发送数量。
     }
 }
