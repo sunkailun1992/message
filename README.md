@@ -4,7 +4,7 @@
 
 当前项目只保留消息模块基础工程、统一异常处理、DDL 入口和 AI 编码规范；不包含 `user` 服务中的用户、租户、角色、权限资源等业务类。
 
-个人公共库固定为 `com:utils:1.7.2`、`com:rpc-api:1.1.0`。个人与美联共用同一阿里云私有 Maven 地址：个人沿用 `com` group，公司保留 `com.kellen` group；artifact 名仍为 `utils` / `rpc-api`，Java package 不随 Maven 坐标改变。公共库须先完成 Maven Local 验证并独立发布私库，消费者再按精确坐标拉取；已有同版制品不得覆盖。
+个人公共库固定为 `com:utils:2.0.3`、`com:rpc-api:2.0.0`。个人与美联共用同一阿里云私有 Maven 地址：个人沿用 `com` group，公司保留 `com.kellen` group；artifact 名仍为 `utils` / `rpc-api`，Java package 不随 Maven 坐标改变。公共库须先完成 Maven Local 验证并独立发布私库，消费者再按精确坐标拉取；已有同版制品不得覆盖。
 
 ## 启动入口
 
@@ -76,7 +76,6 @@ logging.yml
 reuse-configuration.yaml
 traffic-governance.yaml
 actuator.yaml
-security-jwt.yaml
 security-auth.yaml
 swagger.yaml
 message-spring.yaml
@@ -215,11 +214,11 @@ bash scripts/check-secrets.sh
 
 ## 通用安全与架构同步
 
-公共安全依赖精确固定为 `com:utils:1.7.0`。Actuator 除 health 外要求运行时配置 `security.actuator.token` 并在 `actuatorReq` 请求头提交令牌；缺失或错误令牌一律拒绝。令牌由独立环境配置提供，不写入仓库。隔离的消费者回归测试只装配真实 MVC/Actuator 与安全链，不连接 Nacos、数据库、MQ 或远程服务；它不替代目标环境验收。
+公共安全依赖精确固定为 `com:utils:2.0.3`。Actuator 除 health 外要求运行时配置 `security.actuator.token` 并在 `actuatorReq` 请求头提交令牌；缺失或错误令牌一律拒绝。令牌由独立环境配置提供，不写入仓库。隔离的消费者回归测试只装配真实 MVC/Actuator 与安全链，不连接 Nacos、数据库、MQ 或远程服务；它不替代目标环境验收。
 
 版本由 `1.0.6` 升到 `1.0.7`。普通 `test` 排除既有 `manual-rpc` 联调标签；真实 Dubbo 联调需单独授权并显式运行。未引入用药提醒、短信供应商或新增业务 RPC。
 
-公共 RPC 契约固定为 `com:rpc-api:1.0.9`，包含供执行层使用的强制验签入口；本服务不调用旧的可选签名方法来授予 Agent 身份。JWT 签发/验签共用运行时 `security.jwt.secret`（Base64 编码且解码至少 32 字节），无内置默认密钥；测试使用独立合成密钥。
+公共 RPC 契约固定为 `com:rpc-api:2.0.0`（第5阶段删除了旧的会话与开放签名契约）。本服务不签发、不用共享密钥验签任何令牌：访问令牌由 Keycloak 签发，utils 资源服务器按签发方的公钥（JWKS）校验；测试用本机回环上的假签发方现签 RS256 令牌。
 
 ## 本批可观测性接入
 
@@ -244,3 +243,5 @@ Admin/Zipkin 模板与三 profile 的 imports 已退役。服务 JVM 的可选 O
 `1.3.0` 消费 user 发出的“账号已创建”事件，给新账号写欢迎站内信；新增 V6 迁移（`source_event_id` 与部分唯一索引）按事件去重；依赖升级为 `com:utils:1.7.2`（RocketMQ 消息模块）与 `com:rpc-api:1.1.0`（事件契约），消息队列相关描述全部改为 RocketMQ。
 
 `1.3.1` 在 `build.gradle` 照 Nacos、Seata 的写法把 `rocketmq-client`、`rocketmq-remoting`、`rocketmq-common` 锁到 `5.5.1`（与 NAS 上 5.5 服务端同一版本线）。Spring Cloud Alibaba 的 BOM 会把客户端管成 5.3.1，而 utils 排除了只发到 5.3.2 的 rocketmq-acl，5.3.1 里没有 ACL 签名类，监听容器按账号创建签名钩子时失败，1.3.0 因此启动失败。`RocketMqClientCompatibilityTest` 锁住这一点。
+
+`1.4.0` 为第5阶段（不兼容）：入站认证换成 Keycloak。`com:utils` 升到 `2.0.3`，服务成为标准资源服务器（只收 RS256、Keycloak 签发方、受众 `github-api`，权限码与活动租户经 user 服务取得），三套 profile 不再导入 `security-jwt.yaml`，`com:rpc-api` 升到 `2.0.0`。
