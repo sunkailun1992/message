@@ -4,7 +4,7 @@
 
 当前项目只保留消息模块基础工程、统一异常处理、DDL 入口和 AI 编码规范；不包含 `user` 服务中的用户、租户、角色、权限资源等业务类。
 
-个人公共库固定为 `com:utils:2.0.7`、`com:rpc-api:2.0.0`。个人与美联共用同一阿里云私有 Maven 地址：个人沿用 `com` group，公司保留 `com.kellen` group；artifact 名仍为 `utils` / `rpc-api`，Java package 不随 Maven 坐标改变。公共库须先完成 Maven Local 验证并独立发布私库，消费者再按精确坐标拉取；已有同版制品不得覆盖。
+个人公共库固定为 `com:utils:2.0.8`、`com:rpc-api:2.0.0`。个人与美联共用同一阿里云私有 Maven 地址：个人沿用 `com` group，公司保留 `com.kellen` group；artifact 名仍为 `utils` / `rpc-api`，Java package 不随 Maven 坐标改变。公共库须先完成 Maven Local 验证并独立发布私库，消费者再按精确坐标拉取；已有同版制品不得覆盖。
 
 ## 启动入口
 
@@ -214,7 +214,7 @@ bash scripts/check-secrets.sh
 
 ## 通用安全与架构同步
 
-公共安全依赖精确固定为 `com:utils:2.0.7`。Actuator 除 health 外要求运行时配置 `security.actuator.token` 并在 `actuatorReq` 请求头提交令牌；缺失或错误令牌一律拒绝。令牌由独立环境配置提供，不写入仓库。隔离的消费者回归测试只装配真实 MVC/Actuator 与安全链，不连接 Nacos、数据库、MQ 或远程服务；它不替代目标环境验收。
+公共安全依赖精确固定为 `com:utils:2.0.8`。Actuator 除 health 外要求运行时配置 `security.actuator.token` 并在 `actuatorReq` 请求头提交令牌；缺失或错误令牌一律拒绝。令牌由独立环境配置提供，不写入仓库。隔离的消费者回归测试只装配真实 MVC/Actuator 与安全链，不连接 Nacos、数据库、MQ 或远程服务；它不替代目标环境验收。
 
 版本由 `1.0.6` 升到 `1.0.7`。普通 `test` 排除既有 `manual-rpc` 联调标签；真实 Dubbo 联调需单独授权并显式运行。未引入用药提醒、短信供应商或新增业务 RPC。
 
@@ -253,3 +253,5 @@ Admin/Zipkin 模板与三 profile 的 imports 已退役。服务 JVM 的可选 O
 `1.4.3` 将 `com:utils` 升到 `2.0.6`：服务没配受众时只收受众含 `github-api` 的令牌（落实“受众默认 github-api”，漏配不再变成不校验受众）；本服务的 Nacos 配置照旧显式写受众，行为不变。
 
 `1.4.4` 将 `com:utils` 升到 `2.0.7`，用户消息接口带的 `tenantId` 只能是调用方的活动租户（平台超级管理员可点名任一租户），越界在进入业务服务之前回 403（`TenantBoundary.require`）：管理列表、分页、发送，以及当前用户的消息分页、未读数与标记已读。原先带别的租户的 `tenantId` 就能读那个租户的全部用户消息、往那个租户发消息（第 5 阶段最终复核 Important 4）。
+
+`1.4.5` 将 `com:utils` 升到 `2.0.8`（第 5 阶段推迟的小问题）：令牌有效但 user 里没有该用户时由 401 改 403「账号未开通」，网关 BFF 不再反复重新登录；资源服务器核对令牌的 `user_id` 属于它的 `sub`（OIDC Core §5.7），不一致回 403；`iat` 必须有且不能晚于当前时间 60 秒以上；没有业务上下文提供方时启动失败。测试改用 utils 发布的测试夹具 `FakeIssuer`（`com:utils:2.0.8:test-fixtures`），不再自带副本。

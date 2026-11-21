@@ -3,7 +3,7 @@ package com.kellen.message.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kellen.message.controller.UserMessageController;
 import com.kellen.message.service.UserMessageService;
-import com.kellen.message.support.FakeIssuer;
+import com.kellen.security.oauth2.test.FakeIssuer;
 import com.kellen.security.SecurityUser;
 import com.kellen.security.oauth2.FleetResourceServerAutoConfiguration;
 import com.kellen.security.oauth2.SecurityContextResult;
