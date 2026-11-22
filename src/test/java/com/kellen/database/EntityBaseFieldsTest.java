@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** 用户消息实体直接继承租户基类，基类已有的公共字段（含 id、version、code、description、label、sorting）不重复声明。 */
+/** 用户消息实体直接继承租户基类，基类已有的公共字段（含 id、version、code、description、label、sort）不重复声明。 */
 class EntityBaseFieldsTest {
 
     @Test
