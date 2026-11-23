@@ -176,6 +176,7 @@ DELETE /message/manage/templates/{id}
 - 分页接口使用 `@GetMapping(params = {"current", "size"})` 表达分页参数存在性。
 - `Query.current` 和 `Query.size` 不使用 `@NotNull(groups = Select.class)`，避免 OpenAPI 工具把复用 Query 的 `/options` 接口也标记为必填。
 - `options` 只表示轻量选择项集合，不承接完整管理列表。
+- 查询参数里的排序字段 `collationFields` 与查询字段 `fields` 是 SQL 标识符，只按各查询类的白名单换成数据库列名（实体属性名或列名都认，见 `MessageQueryFieldWhitelist`），不在白名单的字段忽略：排序回落该接口的默认排序，查询列保持默认的全部列（1.4.7 起，修复用户消息查询把这两个参数原样拼进 SQL 的注入）。
 
 ## AI 编码规范
 
